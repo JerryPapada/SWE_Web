@@ -1,0 +1,182 @@
+import uuid
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.core.validators import MinValueValidator
+
+
+class Cinema(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(_('name'), max_length=200)
+    description = models.TextField(_('description'), blank=True)
+    address = models.CharField(_('address'), max_length=500)
+    city = models.CharField(_('city'), max_length=100)
+    phone = models.CharField(_('phone'), max_length=20, blank=True)
+    email = models.EmailField(_('email'), blank=True)
+    photo = models.ImageField(
+        _('photo'),
+        upload_to='cinemas/',
+        blank=True,
+        null=True
+    )
+    is_active = models.BooleanField(_('active'), default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('cinema')
+        verbose_name_plural = _('cinemas')
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+class Room(models.Model):
+    """Screening rooms/halls within a cinema."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    cinema = models.ForeignKey(
+        Cinema,
+        on_delete=models.CASCADE,
+        related_name='rooms'
+    )
+    name = models.CharField(_('name'), max_length=100)
+    description = models.TextField(_('description'), blank=True)
+    capacity = models.PositiveIntegerField(
+        _('capacity'),
+        validators=[MinValueValidator(1)]
+    )
+    rows = models.PositiveIntegerField(_('number of rows'), default=10)
+    seats_per_row = models.PositiveIntegerField(_('seats per row'), default=15)
+    photo = models.ImageField(
+        _('photo'),
+        upload_to='rooms/',
+        blank=True,
+        null=True
+    )
+    is_active = models.BooleanField(_('active'), default=True)
+
+    has_3d = models.BooleanField(_('3D capable'), default=False)
+    has_imax = models.BooleanField(_('IMAX'), default=False)
+    has_dolby_atmos = models.BooleanField(_('Dolby Atmos'), default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('room')
+        verbose_name_plural = _('rooms')
+        ordering = ['cinema', 'name']
+        unique_together = ['cinema', 'name']
+    
+    def __str__(self):
+        return f'{self.cinema.name} - {self.name}'
+
+
+class Movie(models.Model):
+    class Rating(models.TextChoices):
+        G = 'G', _('General Audiences')
+        PG = 'PG', _('Parental Guidance')
+        PG13 = 'PG-13', _('Parents Strongly Cautioned')
+        R = 'R', _('Restricted')
+        NC17 = 'NC-17', _('Adults Only')
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(_('title'), max_length=300)
+    original_title = models.CharField(_('original title'), max_length=300, blank=True)
+    description = models.TextField(_('description'))
+    duration_minutes = models.PositiveIntegerField(_('duration (minutes)'))
+    genre = models.CharField(_('genre'), max_length=100)
+    director = models.CharField(_('director'), max_length=200, blank=True)
+    cast = models.TextField(_('cast'), blank=True)
+    rating = models.CharField(
+        _('rating'),
+        max_length=10,
+        choices=Rating.choices,
+        default=Rating.PG13
+    )
+    poster = models.ImageField(
+        _('poster'),
+        upload_to='movies/posters/',
+        blank=True,
+        null=True
+    )
+    trailer_url = models.URLField(_('trailer URL'), blank=True)
+    release_date = models.DateField(_('release date'), null=True, blank=True)
+    is_active = models.BooleanField(_('currently showing'), default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('movie')
+        verbose_name_plural = _('movies')
+        ordering = ['-release_date', 'title']
+    
+    def __str__(self):
+        return self.title
+
+
+class Showtime(models.Model):
+    """Links movies to rooms at specific times with pricing."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    movie = models.ForeignKey(
+        Movie,
+        on_delete=models.CASCADE,
+        related_name='showtimes'
+    )
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name='showtimes'
+    )
+    start_time = models.DateTimeField(_('start time'))
+    end_time = models.DateTimeField(_('end time'))
+
+    price = models.DecimalField(
+        _('price'),
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)]
+    )
+
+    is_active = models.BooleanField(_('active'), default=True)
+    available_seats = models.PositiveIntegerField(_('available seats'))
+
+    is_3d = models.BooleanField(_('3D showing'), default=False)
+    is_imax = models.BooleanField(_('IMAX showing'), default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _('showtime')
+        verbose_name_plural = _('showtimes')
+        ordering = ['start_time']
+    
+    def __str__(self):
+        return f'{self.movie.title} - {self.room} - {self.start_time}'
+    
+    def save(self, *args, **kwargs):
+        # Auto-calculate end time based on movie duration
+        if not self.end_time and self.movie:
+            from datetime import timedelta
+            self.end_time = self.start_time + timedelta(minutes=self.movie.duration_minutes + 15)
+        
+        # Set available seats from room capacity if not specified
+        if not self.available_seats and self.room:
+            self.available_seats = self.room.capacity
+        
+        super().save(*args, **kwargs)
+    
+    @property
+    def is_sold_out(self):
+        return self.available_seats <= 0
+
+    @property
+    def occupancy_percentage(self):
+        if self.room.capacity == 0:
+            return 0
+        return ((self.room.capacity - self.available_seats) / self.room.capacity) * 100
