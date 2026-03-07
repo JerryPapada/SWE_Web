@@ -1,0 +1,42 @@
+#login-body {
+    width: 100%;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+
+#login-box {
+    border: 2px solid rgb(141, 52, 52);
+    max-width: 400px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 2rem;
+}
+
+#login-welcome-text {
+
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: rgb(141, 52, 52);
+    margin-bottom: 1rem;
+}
+
+#login-or {
+    font-size: 1.2rem;
+    color: rgb(141, 52, 52);
+    margin-top: 0.75em;
+}
+
+.error-text-main {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
