@@ -2,41 +2,65 @@
     width: 100%;
     flex: 1;
     display: flex;
+    flex-direction: column;
+
     justify-content: center;
     align-items: center;
-
+    padding: 1rem;
 }
 
 #login-box {
-    border: 2px solid rgb(141, 52, 52);
+
+    width: 100%;
     max-width: 400px;
     padding: 2rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     border-radius: 2rem;
+
 }
 
 #login-welcome-text {
-
-    font-size: 1.2rem;
+    font-size: 3rem;
     font-weight: 600;
     color: rgb(141, 52, 52);
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
 }
 
 #login-or {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: rgb(141, 52, 52);
-    margin-top: 0.75em;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .error-text-main {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
     margin-bottom: 1rem;
-    justify-content: center;
-    text-align: center;
+    font-size: 0.9rem;
     width: 100%;
+    text-align: center;
+}
+
+
+
+@media (max-width: 600px) {
+    #login-box {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        max-width: 90%;
+    }
+
+    #login-welcome-text {
+        font-size: 1.25rem;
+    }
+
+    .button {
+        width: 100% !important;
+    }
 }

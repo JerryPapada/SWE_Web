@@ -63,10 +63,21 @@ export const AuthProvider = ({ children }) => {
 
 
 
+    const register = async (userData) => {
+        const response = await api.post('users/register/', userData);
+        return response.data;
+    };
+
+    const getRoles = async () => {
+        const response = await api.get('users/roles/');
+        return response.data;
+    };
+
     return (
-        <Authorisation.Provider value={{ user, setUser, login, loginWithGoogle, logout, loading }}>
+        <Authorisation.Provider value={{ user, setUser, login, loginWithGoogle, logout, register, getRoles, loading }}>
             {children}
         </Authorisation.Provider>
     );
 };
+
 export const useAuth = () => useContext(Authorisation);

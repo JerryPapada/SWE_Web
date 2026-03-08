@@ -110,3 +110,9 @@ class AdminUserManagementViewSet(ModelViewSet):
         user.is_active = True
         user.save()
         return Response({'message': f'User {user.email} activated.'}, status=status.HTTP_200_OK)
+
+class UserRolesView(APIView):
+    permission_classes = [permissions.AllowAny] 
+    def get(self, request):
+        roles = [{'value': key, 'label': label} for key, label in User.Role.choices]
+        return Response(roles)  

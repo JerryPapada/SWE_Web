@@ -58,8 +58,8 @@ function Login() {
     return (
         <><Header page="login" />
             <div id="login-body">
+                <h1 id="login-welcome-text">Sign up or Log in</h1>
                 <div id="login-box">
-                    <p id="login-welcome-text">Sign up or Log in</p>
                     {(formErrors.non_field_errors || formErrors.detail) && (
                         <p className="error-text-main">
                             {formErrors.non_field_errors?.[0] || formErrors.detail}
