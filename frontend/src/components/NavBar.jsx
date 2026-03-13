@@ -21,13 +21,14 @@ function NavBar() {
                 </ul>
                 <ul>
                     <label className="nav-label">User Management</label>
-                    <li><NavLink to="/">Users</NavLink></li>
+                    <li><NavLink to="/users">Users</NavLink></li>
+                    <li><NavLink to="/account">My Account</NavLink></li>
                 </ul>
                 <ul>
                     <label className="nav-label">Venues and Movies</label>
                     <li><NavLink to="/cinemas">Cinemas</NavLink></li>
-                    <li><NavLink to="/">Movies</NavLink></li>
                     <li><NavLink to="/">Rooms</NavLink></li>
+                    <li><NavLink to="/">Movies</NavLink></li>
                     <li><NavLink to="/">Showtimes</NavLink></li>
                 </ul>
             </nav>

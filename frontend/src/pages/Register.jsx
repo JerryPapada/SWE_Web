@@ -1,7 +1,6 @@
 import Header from "../components/Header"
 import Input from "../components/Input"
 import Button from "../components/Button"
-import Select from '../components/Select';
 import "../pages-css/Register.css"
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/Authorisation';
@@ -13,24 +12,11 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [fnameText, setFnameText] = useState('');
     const [lnameText, setLnameText] = useState('');
-    const [role, setRole] = useState('');
-    const [roleOptions, setRoleOptions] = useState([]);
+    const [role] = useState('USER');
     const [formErrors, setFormErrors] = useState({});
-    const { register, getRoles } = useAuth();
+    const { register } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const rolesData = await getRoles();
-                setRoleOptions(rolesData);
-                setRole(rolesData[2].value); //in this page we need only Regular Users
-            } catch (error) {
-                console.error("Failed to load roles.");
-            }
-        };
-        fetchRoles();
-    }, [getRoles]);
 
     const handleRegister = async (e) => {
         if (e) e.preventDefault();
@@ -62,7 +48,6 @@ function Register() {
                         <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="" error={formErrors.password?.[0]} />
                         <Input label="Confirm Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="" error={formErrors.password_confirm?.[0]} />
 
-                        <Select label="Select Role" value={role} onChange={(e) => setRole(e.target.value)} options={roleOptions} />
 
                         <Button text="Register" disabled={false} type="submit" onClick={handleRegister} className="button" />
                     </form>

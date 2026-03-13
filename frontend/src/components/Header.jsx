@@ -13,9 +13,9 @@ function Header({ page, msg }) {
                 <h1 className="header-logo">Director’s Cut</h1>
                 {page != "login" && page != "register" && (
                     <div className="header-container">
-                        <p>Hello, {user?.first_name}</p>
+
                         <div className="header-buttons">
-                            <Button text="Change Password" onClick={changePassword} disabled={false} type="submit" className="button" />
+                            <p>Hello, {user?.first_name}</p>
                             <Button text="Logout" onClick={logout} disabled={false} type="submit" className="button" />
                         </div>
                     </div>

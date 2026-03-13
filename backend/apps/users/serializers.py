@@ -8,15 +8,18 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
-
+    has_password = serializers.SerializerMethodField()
     class Meta:
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name',
-            'phone', 'photo', 'role', 'is_active', 'created_at'
+            'phone', 'photo', 'role', 'is_active', 'created_at',
+            'has_password'
         ]
         read_only_fields = ['id', 'role', 'is_active', 'created_at']
 
+    def get_has_password(self, obj):
+        return obj.has_usable_password()
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -71,11 +74,31 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class AdminUserSerializer(serializers.ModelSerializer):
     # πληρη στοιχεια χρηστη για admin panel
+    password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+    password_confirm = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name',
+            'id', 'email', 'first_name', 'last_name', 'password', 'password_confirm',
             'phone', 'photo', 'role', 'is_active',
             'is_staff', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, data):
+        password = data.get('password')
+        password_confirm = data.get('password_confirm')
+
+        if password and password != password_confirm:
+            raise serializers.ValidationError({
+                'password_confirm': 'Passwords do not match.'
+            })
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('password_confirm', None)
+        password = validated_data.pop('password', None)
+        if password:
+            return User.objects.create_user(**validated_data, password=password)
+        return User.objects.create_user(**validated_data)

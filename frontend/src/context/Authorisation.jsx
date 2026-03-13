@@ -6,14 +6,11 @@ import api from '../api/axios';
 const Authorisation = createContext();
 
 export const AuthProvider = ({ children }) => {
-    debugger;
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        debugger;
         const checkUser = async () => {
-            debugger;
             const token = sessionStorage.getItem('token');
             if (token) {
                 try {

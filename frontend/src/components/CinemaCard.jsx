@@ -41,12 +41,12 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
         }
     };
     return (
-        <div className="cinema-card">
-            <div className="cinema-card-image">
+        <div className="card">
+            <div className="card-image">
                 <img src={cinema.photo || '/logo.svg'} alt={cinema.name} />
                 {!cinema.is_active && <span className="inactive-badge">Inactive</span>}
             </div>
-            <div className="cinema-card-info">
+            <div className="card-info">
                 {isEditing ? (
                     <div className="edit-form-inline">
                         <Input
@@ -69,14 +69,14 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
                 ) : (
                     <>
                         <h3>{cinema.name}</h3>
-                        <p className="cinema-location"> {cinema.city}, {cinema.address}</p>
-                        <div className="cinema-stats">
+                        <p className="card-items"> {cinema.city}, {cinema.address}</p>
+                        <div>
                             <span> {cinema.rooms_count} Rooms</span>
                         </div>
                     </>
                 )}
             </div>
-            <div className="cinema-card-actions">
+            <div className="card-actions">
                 {!isEditing && (
                     !showConfirm ? (
                         <>{ }
