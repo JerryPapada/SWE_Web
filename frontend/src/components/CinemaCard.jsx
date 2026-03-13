@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { deleteCinema, updateCinema } from '../hooks/FormsRecuests.js';
 import Input from './Input';
-
+import { useAuth } from '../context/Authorisation';
 function CinemaCard({ cinema, onRefresh, onSetMsg }) {
     const [showConfirm, setShowConfirm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState(cinema.name);
     const [editActive, setEditActive] = useState(cinema.is_active);
+    const { user } = useAuth();
+    const rolePermission = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
 
     const Confirm = () => setShowConfirm(!showConfirm);
     const toggleEdit = () => {
@@ -35,7 +37,7 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
             setIsEditing(false);
             onRefresh();
         } catch (error) {
-            onSetMsg("Failed to update cinema.");
+            onSetMsg("Failed to update cinema. You might not have permission.");
         }
     };
     return (
@@ -77,9 +79,9 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
             <div className="cinema-card-actions">
                 {!isEditing && (
                     !showConfirm ? (
-                        <>
-                            <button className="card-button edit" onClick={toggleEdit}>Edit</button>
-                            <button className="card-button delete" onClick={Confirm}>Delete</button>
+                        <>{ }
+                            <button className={rolePermission ? "card-button edit" : "hide-card-button edit"} onClick={toggleEdit}>Edit</button>
+                            <button className={rolePermission ? "card-button delete" : "hide-card-button delete"} onClick={Confirm}>Delete</button>
                         </>
                     ) : (
                         <div className="confirm-delete-box">

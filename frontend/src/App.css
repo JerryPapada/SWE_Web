@@ -538,6 +538,14 @@
   color: white;
 }
 
+.hide-card-button.edit {
+  display: none;
+}
+
+.hide-card-button.delete {
+  display: none;
+}
+
 .card-button.delete {
   background: #991b1b;
   color: white;

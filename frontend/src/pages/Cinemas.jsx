@@ -25,6 +25,7 @@ function Cinemas() {
     const [image, setImage] = useState('');
     const [active, setIsActive] = useState(false);
     const [cinemasList, setCinemasList] = useState([]);
+    const rolePermission = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
 
     let successMessage;
     if (location.state && location.state.successMsg) {
@@ -93,7 +94,7 @@ function Cinemas() {
                 <main className="page-content">
                     <h1>{cinemaForm ? "Cinema Addition" : "Cinemas"}</h1>
                     <Button text="Back" onClick={handleCinemaForm} type="button" className={cinemaForm ? "back-button" : "back-button-hidden"} />
-                    <Button text="Add Cinema" onClick={handleCinemaForm} disabled={false} type="button" className={cinemaForm ? "add-button-hidden" : "add-button"} />
+                    <Button text="Add Cinema" onClick={handleCinemaForm} disabled={false} type="button" className={!rolePermission || cinemaForm ? "add-button-hidden" : "add-button"} />
                     <form className={cinemaForm ? "open-add-form" : "close-add-form"}>
                         <Input label="Cinema's Name" type="text" value={cinemaName} onChange={(e) => setCinemaName(e.target.value)} placeholder="Name" error={formErrors.name?.[0]} />
                         <Textarea label="Description" type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="" error={formErrors.description?.[0]} />
