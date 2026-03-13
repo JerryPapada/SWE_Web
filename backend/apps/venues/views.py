@@ -23,12 +23,18 @@ logger = logging.getLogger(__name__)
 
 class CinemaViewSet(viewsets.ModelViewSet):
     # public browsing, only managers can create/edit
-    queryset = Cinema.objects.filter(is_active=True)
     serializer_class = CinemaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'city', 'address']
     ordering_fields = ['name', 'city', 'created_at']
     filterset_fields = ['city', 'is_active']
+
+    def get_queryset(self):
+        # if manager/admin, show everything (to manage inactive ones)
+        # otherwise only active
+        if self.request.user.is_authenticated and self.request.user.can_manage_venues:
+            return Cinema.objects.all()
+        return Cinema.objects.filter(is_active=True)
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:

@@ -1,28 +1,39 @@
 import Header from "../components/Header"
 import Input from "../components/Input"
 import Button from "../components/Button"
-import "./Login.css"
+import "../pages-css/Login.css"
 import { useState } from 'react';
-import api from '../api/axios'
 import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/Authorisation';
 import { useNavigate } from 'react-router-dom';
-
+import { useLocation } from "react-router-dom";
+import { useTimedMessage } from "../hooks/HeaderMessage.js";
 function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [formErrors, setFormErrors] = useState({});
     const { login, loginWithGoogle } = useAuth();
-
     const navigate = useNavigate();
+    const location = useLocation();
+
+    let successMessage;
+    if (location.state && location.state.successMsg) {
+        successMessage = location.state.successMsg;
+    } else {
+        successMessage = null;
+    }
+
+    let [displayMsg] = useTimedMessage(successMessage);
+
+
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setFormErrors({});
         try {
-            await login(email, password);
-            navigate('/');
+            const user = await login(email, password);
+            navigate('/home');
         }
         catch (error) {
             if (error.response && error.response.data) {
@@ -41,8 +52,8 @@ function Login() {
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
             try {
-                await loginWithGoogle(tokenResponse.access_token);
-                navigate('/');
+                const user = await loginWithGoogle(tokenResponse.access_token);
+                navigate('/home');
             } catch (error) {
                 setFormErrors({ detail: "There was an error during the connection with Google." });
             }
@@ -56,7 +67,7 @@ function Login() {
     }
 
     return (
-        <><Header page="login" />
+        <><Header page="login" msg={displayMsg} />
             <div id="login-body">
                 <h1 id="login-welcome-text">Sign up or Log in</h1>
                 <div id="login-box">
