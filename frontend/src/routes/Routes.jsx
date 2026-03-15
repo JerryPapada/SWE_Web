@@ -8,6 +8,8 @@ import Users from '../pages/Users';
 import Rooms from '../pages/Rooms';
 import Movies from '../pages/Movies';
 import Showtimes from '../pages/Showtimes';
+import MovieInfo from '../pages/MovieInfo';
+import ReservationStep1 from '../pages/ReservationStep1';
 
 function AppRoutes() {
     return (
@@ -22,6 +24,8 @@ function AppRoutes() {
             <Route path="/rooms" element={<Rooms />} />
             <Route path="/movies" element={<Movies />} />
             <Route path="/showtimes" element={<Showtimes />} />
+            <Route path="/movie/movie-info/:movieId" element={<MovieInfo />} />
+            <Route path="/reservations-step-1" element={<ReservationStep1 />} />
         </Routes>
     )
 }

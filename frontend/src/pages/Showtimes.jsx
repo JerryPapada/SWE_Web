@@ -41,8 +41,7 @@ function Showtimes() {
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage();
 
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
+
 
     const handleShowtimeForm = () => {
         setShowtimeForm(!showtimeForm);
@@ -113,11 +112,15 @@ function Showtimes() {
     };
 
     useEffect(() => {
-        fetchMovies();
-        fetchRooms();
-        fetchCinemas();
-        fetchShowtimes();
-    }, []);
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchMovies();
+            fetchRooms();
+            fetchCinemas();
+            fetchShowtimes();
+        }
+    }, [user, navigate]);
 
     return (
         <>

@@ -37,12 +37,13 @@ function Cinemas() {
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
 
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
-
     useEffect(() => {
-        fetchCinemas();
-    }, []);
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchCinemas();
+        }
+    }, [user, navigate]);
 
     const handleCinemaForm = () => {
         setCinemaForm(!cinemaForm);
@@ -104,7 +105,7 @@ function Cinemas() {
                         <Input label="City" type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" error={formErrors.city?.[0]} />
                         <Input label="Phone Number" type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Phone Number" error={formErrors.phoneNumber?.[0]} />
                         <Input label="Email" type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" error={formErrors.email?.[0]} />
-                        <Input key={cinemaForm} label="Image" type="file" accept=".jpg,.jpeg,.svg" onChange={(e) => setImage(e.target.files[0])} placeholder="Image" error={formErrors.image?.[0]} />
+                        <Input key={cinemaForm} label="Image" type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => setImage(e.target.files[0])} placeholder="Image" error={formErrors.image?.[0]} />
                         <Input label="Is Active" type="checkbox" value={active} onChange={(e) => setIsActive(e.target.checked)} placeholder="Is Active" error={formErrors.isActive?.[0]} />
                         <Button text="Save Cinema" onClick={addCinema} disabled={false} type="button" className="save-button" />
                     </form>

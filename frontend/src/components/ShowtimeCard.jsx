@@ -94,7 +94,7 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
 
                         <div>
                             <span style={{ color: showtime.is_active ? '#22c55e' : '#ef4444' }}>
-                                Status: {showtime.is_active ? 'Active' : 'Inactve'}
+                                Status: {showtime.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </div>
                     </>

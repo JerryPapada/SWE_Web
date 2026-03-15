@@ -12,8 +12,11 @@ function NavBar() {
 
             <nav className={isOpen ? "navbar-open" : "navbar-closed"}>
                 <ul>
+                    <li className="nav-home"><NavLink to="/home">Home</NavLink></li>
+                </ul>
+                <ul>
                     <label className="nav-label">Reservations</label>
-                    <li><NavLink to="/">Reservations</NavLink></li>
+                    <li><NavLink to="/reservations-step-1">Reservations</NavLink></li>
                 </ul>
                 <ul>
                     <label className="nav-label">Tickets</label>

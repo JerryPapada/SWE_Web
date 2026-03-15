@@ -36,13 +36,12 @@ function Account() {
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     useEffect(() => {
-        fetchUser();
-    }, []);
-
-
-
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchUser();
+        }
+    }, [user, navigate]);
 
     const fetchUser = async () => {
         try {

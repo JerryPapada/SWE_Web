@@ -4,11 +4,12 @@ import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import { useState, useEffect } from 'react';
 import Button from '../components/Button';
 import Input from '../components/Input.jsx';
-import TextArea from '../components/TextArea.jsx';
+import Textarea from '../components/Textarea.jsx';
 import Select from '../components/Select.jsx';
 import { useAuth } from '../context/Authorisation';
 import { getMovies, addMovieForm, getRatingOptions } from '../services/movieServices.js';
 import MovieCard from '../components/MovieCard.jsx';
+import { useNavigate } from 'react-router-dom';
 
 function Movies() {
     const { user } = useAuth();
@@ -26,7 +27,7 @@ function Movies() {
     const [trailer, setTrailer] = useState('');
     const [moviesList, setMoviesList] = useState([]);
     const [ratingOptions, setRatingOptions] = useState([]);
-
+    const navigate = useNavigate();
 
     let successMessage;
     if (location.state && location.state.successMsg) {
@@ -36,8 +37,7 @@ function Movies() {
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage();
 
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
+
 
     const handleMovieForm = () => {
         setMovieForm(!movieForm);
@@ -106,9 +106,13 @@ function Movies() {
     };
 
     useEffect(() => {
-        fetchMovies();
-        fetchRatingOptions();
-    }, []);
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchMovies();
+            fetchRatingOptions();
+        }
+    }, [user, navigate]);
 
     return (
         <>
@@ -121,13 +125,13 @@ function Movies() {
                     <Button text="Add Movie" onClick={handleMovieForm} disabled={false} type="button" className={!rolePermission || movieForm ? "hidden" : "add-button"} />
                     <form className={movieForm ? "open-add-form" : "close-add-form"}>
                         <Input label="Title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" error={formErrors.title?.[0]} />
-                        <TextArea label="Description" type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" error={formErrors.description?.[0]} />
-                        <Input label="Duration" type="number" onChange={(e) => setDuration(e.target.value)} placeholder="Duration" error={formErrors.duration_minutes?.[0]} />
+                        <Textarea label="Description" type="text" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" error={formErrors.description?.[0]} />
+                        <Input label="Duration" type="number" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Duration" error={formErrors.duration_minutes?.[0]} />
                         <Input label="Genre" type="text" value={genre} onChange={(e) => setGenre(e.target.value)} placeholder="Genre" error={formErrors.genre?.[0]} />
                         <Select label="Rating" value={rating} onChange={(e) => setRating(e.target.value)} error={formErrors.rating?.[0]} options={ratingOptions} />
                         <Input label="Director" type="text" value={director} onChange={(e) => setDirector(e.target.value)} placeholder="Director" error={formErrors.director?.[0]} />
-                        <Input label="Poster" type="file" accept=".jpg,.jpeg,.svg" onChange={(e) => setPoster(e.target.files[0])} placeholder="Image" error={formErrors.poster?.[0]} />
-                        <Input label="Trailer" type="url" onChange={(e) => setTrailer(e.target.value)} placeholder="Trailer" error={formErrors.trailer_url?.[0]} />
+                        <Input key={movieForm} label="Poster" type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => setPoster(e.target.files[0])} placeholder="Image" error={formErrors.poster?.[0]} />
+                        <Input label="Trailer" type="url" value={trailer} onChange={(e) => setTrailer(e.target.value)} placeholder="Trailer" error={formErrors.trailer_url?.[0]} />
                         <Input label="Is Active" type="checkbox" value={isActive} onChange={(e) => setIsActive(e.target.checked)} placeholder="Is Active" error={formErrors.is_active?.[0]} />
                         <Button text="Save Movie" onClick={handleAddMovie} disabled={false} type="button" className="save-button" />
                     </form>

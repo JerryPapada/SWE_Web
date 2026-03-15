@@ -39,8 +39,7 @@ function Users() {
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
 
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
+
 
     const handleUserForm = () => {
         setUserForm(!userForm);
@@ -71,9 +70,14 @@ function Users() {
                 setDisplayMsg("Failed to fetch roles!");
             }
         };
-        fetchRoles();
-        fetchUsers();
-    }, []);
+
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchRoles();
+            fetchUsers();
+        }
+    }, [user, navigate]);
 
     const handleAddUser = async (e) => {
         e.preventDefault();

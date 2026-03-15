@@ -22,6 +22,7 @@ function Rooms() {
     const [formErrors, setFormErrors] = useState({});
     const [isActive, setIsActive] = useState(false);
     const [cinema, setCinema] = useState("");
+    const [cinemasList, setCinemasList] = useState([]);
     const [cinemaOptions, setCinemaOptions] = useState([]);
     const [name, setName] = useState('');
     const [capacity, setCapacity] = useState('');
@@ -40,8 +41,7 @@ function Rooms() {
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
 
-    if (!user)
-        navigate('/login', { state: { successMsg: 'You have logged out!' } });
+
 
     const handleRoomForm = () => {
         setRoomForm(!roomForm);
@@ -53,6 +53,7 @@ function Rooms() {
             setCinemasList(cinemasData.results);
             setCinemaOptions(cinemasData.results.map(cinema => ({ value: cinema.id, label: cinema.name })));
         } catch (error) {
+            debugger;
             setDisplayMsg("Failed to fetch cinemas!");
         }
     };
@@ -106,10 +107,14 @@ function Rooms() {
         }
     };
     useEffect(() => {
-        fetchCinemas();
-        fetchRoomTypes();
-        fetchRooms();
-    }, []);
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else {
+            fetchCinemas();
+            fetchRoomTypes();
+            fetchRooms();
+        }
+    }, [user, navigate]);
 
     return (
         <>
@@ -127,7 +132,7 @@ function Rooms() {
                         <Input label="Rows" type="number" value={rows} onChange={(e) => setRows(e.target.value)} placeholder="Rows" error={formErrors.rows?.[0]} />
                         <Input label="Seats per Row" type="number" value={seatsPerRow} onChange={(e) => setSeatsPerRow(e.target.value)} placeholder="Seats per Row" error={formErrors.seatsPerRow?.[0]} />
                         <Select label="Room Type" value={roomType} onChange={(e) => setRoomType(e.target.value)} error={formErrors.roomType?.[0]} options={roomTypesList} placeholder="Room Type" />
-                        <Input key={roomForm} label="Image" type="file" accept=".jpg,.jpeg,.svg" onChange={(e) => setImage(e.target.files[0])} placeholder="Image" error={formErrors.image?.[0]} />
+                        <Input key={roomForm} label="Image" type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => setImage(e.target.files[0])} placeholder="Image" error={formErrors.image?.[0]} />
                         <Input label="Is Active" type="checkbox" value={isActive} onChange={(e) => setIsActive(e.target.checked)} placeholder="Is Active" error={formErrors.is_active?.[0]} />
                         <Button text="Save Room" onClick={handleAddRoom} disabled={false} type="button" className="save-button" />
                     </form>

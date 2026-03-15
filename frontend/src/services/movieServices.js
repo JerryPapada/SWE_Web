@@ -2,7 +2,6 @@ import api from '../api/axios';
 
 export const addMovieForm = async (title, description, duration, genre, rating, director, poster, isActive, trailer) => {
     try {
-        debugger;
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
@@ -22,11 +21,13 @@ export const addMovieForm = async (title, description, duration, genre, rating, 
 }
 
 export const getMovies = async () => {
-    debugger;
     const response = await api.get('venues/movies/');
     return response.data;
 };
-
+export const getMovie = async (movieId) => {
+    const response = await api.get(`venues/movies/${movieId}/`);
+    return response.data;
+};
 export const deleteMovie = async (id) => {
     const response = await api.delete(`venues/movies/${id}/`);
     return response.data;
