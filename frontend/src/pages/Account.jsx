@@ -5,9 +5,10 @@ import { useState } from 'react';
 import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import Header from '../components/Header';
 import NavBar from '../components/NavBar';
-import { getUser } from '../hooks/FormsRecuests.js';
+import { getUser } from '../services/userServices.js';
 import { useEffect } from 'react';
-import { updateUserForm, changePassword } from '../hooks/FormsRecuests.js';
+import { updateUserForm } from '../services/userServices.js';
+import { changePassword } from '../services/authServices.js';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
 

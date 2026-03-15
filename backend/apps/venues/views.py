@@ -60,11 +60,15 @@ class CinemaViewSet(viewsets.ModelViewSet):
 
 
 class RoomViewSet(viewsets.ModelViewSet):
-    queryset = Room.objects.filter(is_active=True).select_related('cinema')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'cinema__name']
     ordering_fields = ['name', 'capacity', 'created_at']
-    filterset_fields = ['cinema', 'has_3d', 'has_imax', 'has_dolby_atmos', 'is_active']
+    filterset_fields = ['cinema', 'room_type', 'is_active']
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.can_manage_venues:
+            return Room.objects.all().select_related('cinema')
+        return Room.objects.filter(is_active=True).select_related('cinema')
 
     def get_serializer_class(self):
         if self.action in ['retrieve', 'create', 'update', 'partial_update']:
@@ -72,9 +76,14 @@ class RoomViewSet(viewsets.ModelViewSet):
         return RoomSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'room_types']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
+
+    @action(detail=False, methods=['get'], url_path='room-types')
+    def room_types(self, request):
+        choices = [{'value': k, 'label': str(v)} for k, v in Room.RoomType.choices]
+        return Response({'results': choices})
 
 
 class MovieViewSet(viewsets.ModelViewSet):
@@ -91,7 +100,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         return MovieSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'rating_options']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
@@ -100,6 +109,11 @@ class MovieViewSet(viewsets.ModelViewSet):
             if not self.request.user.is_authenticated or not self.request.user.can_manage_venues:
                 return Movie.objects.filter(is_active=True)
         return Movie.objects.all()
+
+    @action(detail=False, methods=['get'], url_path='rating-options')
+    def rating_options(self, request):
+        choices = [{'value': k, 'label': str(v)} for k, v in Movie.Rating.choices]
+        return Response({'results': choices})
 
     @action(detail=True, methods=['get'])
     def showtimes(self, request, pk=None):

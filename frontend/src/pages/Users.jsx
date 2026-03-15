@@ -8,7 +8,7 @@ import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import { useState, useEffect } from 'react';
 import Input from '../components/Input.jsx';
 import Select from '../components/Select.jsx';
-import { addUserForm, getUsers } from '../hooks/FormsRecuests.js';
+import { addUserForm, getUsers } from '../services/userServices.js';
 import UserCard from '../components/UserCard.jsx';
 
 function Users() {
@@ -52,7 +52,13 @@ function Users() {
             debugger;
             setUsersList(usersData.results);
         } catch (error) {
-            setDisplayMsg("Failed to fetch users!");
+            if (error.response.status === 401) {
+                navigate('/login', { state: { successMsg: 'You have logged out!' } });
+            } else if (error.response.status === 403) {
+                setDisplayMsg("You do not have permission to perform this action!");
+            } else {
+                setDisplayMsg("Failed to fetch users!");
+            }
         }
     };
 
@@ -115,7 +121,7 @@ function Users() {
                         <Input label="Confirm Password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm Password" error={formErrors.password_confirm?.[0]} />
                         <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)} error={formErrors.role?.[0]} options={roleOptions} placeholder="Role" />
                         <Input label="Is Active" type="checkbox" value={isActive} onChange={(e) => setIsActive(e.target.checked)} placeholder="Is Active" error={formErrors.is_active?.[0]} />
-                        <Button text="Add User" onClick={handleAddUser} disabled={false} type="button" className="save-button" />
+                        <Button text="Save User" onClick={handleAddUser} disabled={false} type="button" className="save-button" />
                     </form>
                     <div className={userForm ? "catalogue-hidden" : "catalogue-visible"}>
                         {usersList.length > 0 ? (

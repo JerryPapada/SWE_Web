@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { deleteUserAdmin, updateUserAdmin } from '../hooks/FormsRecuests.js';
+import { deleteUserAdmin, updateUserAdmin } from '../services/userServices.js';
 import Input from './Input';
 import Select from './Select';
 import { useAuth } from '../context/Authorisation';

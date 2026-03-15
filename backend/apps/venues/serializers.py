@@ -29,7 +29,7 @@ class RoomSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'cinema', 'cinema_name', 'name', 'description',
             'capacity', 'rows', 'seats_per_row', 'photo', 'is_active',
-            'has_3d', 'has_imax', 'has_dolby_atmos',
+            'room_type',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
@@ -78,7 +78,7 @@ class ShowtimeSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'movie', 'movie_title', 'room', 'room_name',
             'cinema_name', 'start_time', 'end_time', 'price',
-            'is_active', 'available_seats', 'is_3d', 'is_imax',
+            'is_active', 'available_seats', 'is_3d', 'is_imax', 'is_dolby_atmos',
             'is_sold_out', 'occupancy_percentage',
             'created_at', 'updated_at'
         ]
@@ -108,5 +108,5 @@ class ShowtimeCalendarSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'movie_title', 'movie_poster', 'room_name',
             'cinema_name', 'start_time', 'end_time', 'price',
-            'available_seats', 'is_3d', 'is_imax'
+            'available_seats', 'is_3d', 'is_imax', 'is_dolby_atmos'
         ]

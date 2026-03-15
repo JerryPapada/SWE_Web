@@ -1,8 +1,7 @@
 .app-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 .main-content {
@@ -28,6 +27,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 300px;
 }
 
 .header-logo {
@@ -77,6 +78,9 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 .hidden {
@@ -99,6 +103,9 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 .textArea-label,
@@ -139,9 +146,10 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 100%;
   visibility: visible !important;
   opacity: 1 !important;
+  width: 100%;
+  max-width: 300px;
 }
 
 .select {
@@ -151,9 +159,11 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
-  width: 100%;
   background-color: white;
   color: #0f172a;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 .select-error {
@@ -164,9 +174,11 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
-  width: 100%;
   background-color: white;
   color: #0f172a;
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
 }
 
 .select-label {
@@ -378,8 +390,8 @@
 }
 
 .nav-button-open {
-  height: 5%;
-  width: 5%;
+  height: 3.5rem;
+  width: 3.5rem;
   background-color: rgb(141, 52, 52);
   border-radius: 0 0.5rem 0.5rem 0;
   left: 15%;
@@ -388,8 +400,8 @@
 }
 
 .nav-button-closed {
-  height: 5%;
-  width: 5%;
+  height: 3.5rem;
+  width: 3.5rem;
   background-color: rgb(141, 52, 52);
   border-radius: 0 0.5rem 0.5rem 0;
   left: 0%;
@@ -406,7 +418,7 @@
   color: #0f172a;
   margin: 0;
   padding: 0 2rem;
-  height: 5%;
+  height: 3.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -426,7 +438,7 @@
   color: #0f172a;
   margin: 0;
   padding: 0 2rem;
-  height: 5%;
+  height: 3.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -442,7 +454,7 @@
   height: auto;
   opacity: 1;
   transition: all 0.5s ease;
-  overflow: hidden;
+  overflow: visible;
   align-items: center;
 }
 
@@ -478,7 +490,6 @@
 
 .card {
   background: #1e293b;
-
   border-radius: 1rem;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;

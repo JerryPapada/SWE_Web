@@ -27,9 +27,9 @@ function NavBar() {
                 <ul>
                     <label className="nav-label">Venues and Movies</label>
                     <li><NavLink to="/cinemas">Cinemas</NavLink></li>
-                    <li><NavLink to="/">Rooms</NavLink></li>
-                    <li><NavLink to="/">Movies</NavLink></li>
-                    <li><NavLink to="/">Showtimes</NavLink></li>
+                    <li><NavLink to="/rooms">Rooms</NavLink></li>
+                    <li><NavLink to="/movies">Movies</NavLink></li>
+                    <li><NavLink to="/showtimes">Showtimes</NavLink></li>
                 </ul>
             </nav>
             <Button text={isOpen ? "<<" : ">>"} onClick={toggleNav} disabled={false} type="button" className={isOpen ? "nav-button-open" : "nav-button-closed"} />

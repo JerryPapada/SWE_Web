@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { deleteCinema, updateCinema } from '../hooks/FormsRecuests.js';
+import { deleteCinema, updateCinema } from '../services/cinemaServices.js';
 import Input from './Input';
 import { useAuth } from '../context/Authorisation';
 function CinemaCard({ cinema, onRefresh, onSetMsg }) {

@@ -12,8 +12,8 @@ class CinemaAdmin(admin.ModelAdmin):
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
-    list_display = ['name', 'cinema', 'capacity', 'has_3d', 'has_imax', 'is_active']
-    list_filter = ['cinema', 'has_3d', 'has_imax', 'has_dolby_atmos', 'is_active']
+    list_display = ['name', 'cinema', 'capacity', 'room_type', 'is_active']
+    list_filter = ['cinema', 'room_type', 'is_active']
     search_fields = ['name', 'cinema__name']
     ordering = ['cinema', 'name']
 

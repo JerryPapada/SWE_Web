@@ -9,7 +9,7 @@ import Button from '../components/Button.jsx';
 import Input from '../components/Input.jsx';
 import Textarea from '../components/Textarea.jsx';
 import CinemaCard from '../components/CinemaCard.jsx';
-import { saveCinemaForm, getCinemas } from '../hooks/FormsRecuests.js';
+import { saveCinemaForm, getCinemas } from '../services/cinemaServices.js';
 
 function Cinemas() {
 
@@ -27,7 +27,7 @@ function Cinemas() {
     const [image, setImage] = useState('');
     const [active, setIsActive] = useState(false);
     const [cinemasList, setCinemasList] = useState([]);
-    const rolePermission = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
+    const rolePermission = user?.role === 'ADMIN';
 
     let successMessage;
     if (location.state && location.state.successMsg) {

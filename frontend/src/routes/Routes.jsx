@@ -5,6 +5,9 @@ import Home from '../pages/Home';
 import Cinemas from '../pages/Cinemas';
 import Account from '../pages/Account';
 import Users from '../pages/Users';
+import Rooms from '../pages/Rooms';
+import Movies from '../pages/Movies';
+import Showtimes from '../pages/Showtimes';
 
 function AppRoutes() {
     return (
@@ -16,6 +19,9 @@ function AppRoutes() {
             <Route path="/cinemas" element={<Cinemas />} />
             <Route path="/account" element={<Account />} />
             <Route path="/users" element={<Users />} />
+            <Route path="/rooms" element={<Rooms />} />
+            <Route path="/movies" element={<Movies />} />
+            <Route path="/showtimes" element={<Showtimes />} />
         </Routes>
     )
 }
