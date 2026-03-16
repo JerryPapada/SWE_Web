@@ -3,7 +3,7 @@ from .base import *
 DEBUG = True
 
 # Development-specific allowed hosts
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0','192.168.1.69']
 
 # Use console email backend in development
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

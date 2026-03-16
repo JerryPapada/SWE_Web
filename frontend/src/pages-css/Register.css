@@ -1,0 +1,22 @@
+#register-text {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: rgb(141, 52, 52);
+}
+
+.selects {
+    display: none !important;
+}
+
+#register-box {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}

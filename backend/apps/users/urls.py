@@ -7,6 +7,7 @@ from .views import (
     ChangePasswordView,
     GoogleLogin,
     AdminUserManagementViewSet,
+    UserRolesView,
 )
 
 router = DefaultRouter()
@@ -18,4 +19,5 @@ urlpatterns = [
     path('change-password/', ChangePasswordView.as_view(), name='user-change-password'),
     path('google/', GoogleLogin.as_view(), name='google_login'),
     path('', include(router.urls)),
+    path('roles/', UserRolesView.as_view(), name='user-roles'),
 ]

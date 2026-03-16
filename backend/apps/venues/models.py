@@ -57,9 +57,18 @@ class Room(models.Model):
     )
     is_active = models.BooleanField(_('active'), default=True)
 
-    has_3d = models.BooleanField(_('3D capable'), default=False)
-    has_imax = models.BooleanField(_('IMAX'), default=False)
-    has_dolby_atmos = models.BooleanField(_('Dolby Atmos'), default=False)
+    class RoomType(models.TextChoices):
+        SIMPLE = 'SIMPLE', _('Simple')
+        THREE_D = '3D', _('3D Capable')
+        IMAX = 'IMAX', _('IMAX')
+        DOLBY_ATMOS = 'DOLBY_ATMOS', _('Dolby Atmos')
+
+    room_type = models.CharField(
+        _('room type'),
+        max_length=20,
+        choices=RoomType.choices,
+        default=RoomType.SIMPLE
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -147,6 +156,7 @@ class Showtime(models.Model):
 
     is_3d = models.BooleanField(_('3D showing'), default=False)
     is_imax = models.BooleanField(_('IMAX showing'), default=False)
+    is_dolby_atmos = models.BooleanField(_('Dolby Atmos showing'), default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -189,7 +199,13 @@ class Showtime(models.Model):
 
         if self.available_seats is None and self.room:
             self.available_seats = self.room.capacity
-
+            
+        # Automatically inherit 3D and IMAX settings from the selected Room
+        if self.room:
+            self.is_3d = (self.room.room_type == Room.RoomType.THREE_D)
+            self.is_imax = (self.room.room_type == Room.RoomType.IMAX)
+            self.is_dolby_atmos = (self.room.room_type == Room.RoomType.DOLBY_ATMOS)
+        
         super().save(*args, **kwargs)
     
     @property
