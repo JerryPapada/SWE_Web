@@ -5,7 +5,6 @@ from django.conf import settings
 from .models import Room, Movie, Showtime
 
 
-# sends email to all users who have reservations affected by a change
 def notify_affected_users(reservations, reason):
     for reservation in reservations:
         subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"

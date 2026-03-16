@@ -1,14 +1,15 @@
 from rest_framework import serializers
+from django.db import transaction
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
 
+from apps.venues.models import Showtime
 from apps.venues.serializers import ShowtimeCalendarSerializer
-from .models import Reservation
+from .models import Reservation, ReservationHistory
 
 
 class ReservationSerializer(serializers.ModelSerializer):
-    # basic reservation info with some denormalized fields for convenience
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
     movie_title = serializers.CharField(source='showtime.movie.title', read_only=True)
@@ -64,12 +65,30 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        validated_data['user'] = self.context['request'].user
-        validated_data['total_price'] = (
-            validated_data['showtime'].price * validated_data.get('num_seats', 1)
-        )
-        reservation = Reservation.objects.create(**validated_data)
-        reservation.confirm()
+        request = self.context['request']
+        num_seats = validated_data.get('num_seats', 1)
+        showtime_id = validated_data['showtime'].id
+
+        with transaction.atomic():
+            locked_showtime = Showtime.objects.select_for_update().get(pk=showtime_id)
+            if not locked_showtime.is_active:
+                raise serializers.ValidationError({'showtime': 'This showtime is not available.'})
+            if locked_showtime.start_time <= timezone.now():
+                raise serializers.ValidationError({'showtime': 'Cannot book past showtimes.'})
+            if locked_showtime.available_seats < num_seats:
+                raise serializers.ValidationError({
+                    'num_seats': f'Only {locked_showtime.available_seats} seats available.'
+                })
+
+            validated_data['user'] = request.user
+            validated_data['showtime'] = locked_showtime
+            validated_data['total_price'] = locked_showtime.price * num_seats
+            reservation = Reservation.objects.create(**validated_data)
+
+            try:
+                reservation.confirm(changed_by=request.user, notes='Created via booking form')
+            except ValueError as exc:
+                raise serializers.ValidationError({'detail': str(exc)}) from exc
         return reservation
 
 
@@ -78,7 +97,6 @@ class ReservationDetailSerializer(ReservationSerializer):
 
 
 class MyReservationsSerializer(serializers.ModelSerializer):
-    # lighter serializer for the "my reservations" endpoint
     movie_title = serializers.CharField(source='showtime.movie.title', read_only=True)
     movie_poster = serializers.ImageField(source='showtime.movie.poster', read_only=True)
     cinema_name = serializers.CharField(source='showtime.room.cinema.name', read_only=True)
@@ -96,3 +114,15 @@ class MyReservationsSerializer(serializers.ModelSerializer):
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_has_ticket(self, obj):
         return hasattr(obj, 'ticket')
+
+
+class ReservationHistorySerializer(serializers.ModelSerializer):
+    changed_by_email = serializers.EmailField(source='changed_by.email', read_only=True)
+
+    class Meta:
+        model = ReservationHistory
+        fields = [
+            'id', 'reservation', 'old_status', 'new_status',
+            'changed_by', 'changed_by_email', 'notes', 'created_at'
+        ]
+        read_only_fields = fields

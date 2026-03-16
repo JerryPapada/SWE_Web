@@ -159,16 +159,37 @@ class Showtime(models.Model):
     def __str__(self):
         return f'{self.movie.title} - {self.room} - {self.start_time}'
     
-    def save(self, *args, **kwargs):
-        # Auto-calculate end time based on movie duration
-        if not self.end_time and self.movie:
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        
+        # Ensure end_time is calculated if missing
+        if self.movie and self.start_time and not self.end_time:
             from datetime import timedelta
             self.end_time = self.start_time + timedelta(minutes=self.movie.duration_minutes + 15)
-        
-        # Set available seats from room capacity if not specified
-        if not self.available_seats and self.room:
+            
+        if self.start_time and self.end_time and self.room:
+            if self.start_time >= self.end_time:
+                raise ValidationError(_('Start time must be before end time.'))
+                
+            overlapping_showtimes = Showtime.objects.filter(
+                room=self.room,
+                start_time__lt=self.end_time,
+                end_time__gt=self.start_time
+            )
+            
+            if self.pk:
+                overlapping_showtimes = overlapping_showtimes.exclude(pk=self.pk)
+                
+            if overlapping_showtimes.exists():
+                raise ValidationError(_('This room is already occupied by another showtime during this period.'))
+
+    def save(self, *args, **kwargs):
+        # We call clean() manually since Django doesn't do it on save()
+        self.clean()
+
+        if self.available_seats is None and self.room:
             self.available_seats = self.room.capacity
-        
+
         super().save(*args, **kwargs)
     
     @property

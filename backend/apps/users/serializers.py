@@ -1,4 +1,3 @@
-# serializers για users
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -49,7 +48,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    # ενημερωση προφιλ - ονομα, τηλεφωνο, φωτο
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'phone', 'photo']
@@ -61,6 +59,10 @@ class ChangePasswordSerializer(serializers.Serializer):
         required=True, validators=[validate_password],
         style={'input_type': 'password'}
     )
+    new_password_confirm = serializers.CharField(
+        required=True,
+        style={'input_type': 'password'}
+    )
 
     def validate_old_password(self, value):
         user = self.context['request'].user
@@ -68,9 +70,15 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError('Old password is incorrect.')
         return value
 
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['new_password_confirm']:
+            raise serializers.ValidationError({
+                'new_password_confirm': 'Passwords do not match.'
+            })
+        return attrs
+
 
 class AdminUserSerializer(serializers.ModelSerializer):
-    # πληρη στοιχεια χρηστη για admin panel
     class Meta:
         model = User
         fields = [

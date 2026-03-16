@@ -36,9 +36,12 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class RoomDetailSerializer(RoomSerializer):
-    # includes full cinema object instead of just the id
     cinema = CinemaSerializer(read_only=True)
-    cinema_id = serializers.UUIDField(write_only=True)
+    cinema_id = serializers.PrimaryKeyRelatedField(
+        source='cinema',
+        queryset=Cinema.objects.all(),
+        write_only=True
+    )
 
     class Meta(RoomSerializer.Meta):
         fields = RoomSerializer.Meta.fields + ['cinema_id']
@@ -57,7 +60,6 @@ class MovieSerializer(serializers.ModelSerializer):
 
 
 class MovieListSerializer(serializers.ModelSerializer):
-    # lighter version for list views
     class Meta:
         model = Movie
         fields = [
@@ -84,20 +86,50 @@ class ShowtimeSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'end_time', 'created_at', 'updated_at']
 
+    def validate(self, data):
+        # Get existing instance if it exists
+        instance = self.instance
+        
+        # Create a temporary instance for validation
+        if instance:
+            # For updates, create a dummy instance with updated values
+            temp_instance = Showtime.objects.get(pk=instance.pk)
+            for attr, value in data.items():
+                setattr(temp_instance, attr, value)
+        else:
+            # For creation
+            temp_instance = Showtime(**data)
+            
+        try:
+            temp_instance.clean()
+        except Exception as e:
+            from django.core.exceptions import ValidationError as DjangoValidationError
+            if isinstance(e, DjangoValidationError):
+                raise serializers.ValidationError(e.message_dict if hasattr(e, 'message_dict') else e.messages)
+            raise serializers.ValidationError(str(e))
+            
+        return data
+
 
 class ShowtimeDetailSerializer(ShowtimeSerializer):
-    # nested objects for detail/create/update
     movie = MovieListSerializer(read_only=True)
     room = RoomSerializer(read_only=True)
-    movie_id = serializers.UUIDField(write_only=True)
-    room_id = serializers.UUIDField(write_only=True)
+    movie_id = serializers.PrimaryKeyRelatedField(
+        source='movie',
+        queryset=Movie.objects.all(),
+        write_only=True
+    )
+    room_id = serializers.PrimaryKeyRelatedField(
+        source='room',
+        queryset=Room.objects.all(),
+        write_only=True
+    )
 
     class Meta(ShowtimeSerializer.Meta):
         fields = ShowtimeSerializer.Meta.fields + ['movie_id', 'room_id']
 
 
 class ShowtimeCalendarSerializer(serializers.ModelSerializer):
-    # minimal fields for the calendar widget
     movie_title = serializers.CharField(source='movie.title', read_only=True)
     movie_poster = serializers.ImageField(source='movie.poster', read_only=True)
     room_name = serializers.CharField(source='room.name', read_only=True)

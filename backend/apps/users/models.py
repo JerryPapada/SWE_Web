@@ -5,8 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
-    """Email-based auth instead of username."""
-
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError(_('The Email field must be set'))
@@ -30,15 +28,6 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """
-    Custom User model with role-based permissions.
-    
-    Roles:
-    - ADMIN: Full system access
-    - TICKET_MANAGER: Can manage venues, movies, and tickets
-    - USER: Can make reservations
-    """
-    
     class Role(models.TextChoices):
         ADMIN = 'ADMIN', _('Administrator')
         TICKET_MANAGER = 'TICKET_MANAGER', _('Ticket Manager')
@@ -97,9 +86,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def can_manage_venues(self):
-        # both admins and ticket managers can handle venue/movie data
         return self.role in [self.Role.ADMIN, self.Role.TICKET_MANAGER]
 
     @property
     def can_make_reservations(self):
-        return self.is_active  # inactive users blocked
+        return self.is_active

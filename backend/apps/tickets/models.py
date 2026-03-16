@@ -49,7 +49,6 @@ class Ticket(models.Model):
         if not self.qr_data:
             self.qr_data = self._make_qr_data()
         super().save(*args, **kwargs)
-        # generate the actual QR image if missing
         if not self.qr_code:
             self._make_qr_image()
 
@@ -70,8 +69,6 @@ class Ticket(models.Model):
         self.qr_code.save(f'ticket_{self.id}.png', ContentFile(buf.read()), save=True)
 
     def check_in(self, staff_user=None):
-        # validates and marks ticket as used
-        # 30min grace period after showtime start
         from django.utils import timezone
 
         if self.checked_in:
@@ -80,7 +77,6 @@ class Ticket(models.Model):
         if self.status != self.Status.VALID:
             return False, f'Ticket is {self.status}.'
 
-        # check if we're past the grace period
         if self.reservation.showtime.start_time < timezone.now():
             from datetime import timedelta
             cutoff = self.reservation.showtime.start_time + timedelta(minutes=30)
@@ -105,7 +101,6 @@ class Ticket(models.Model):
 
 
 class VisitorLog(models.Model):
-    # tracks who entered - both walk-ins and reservation holders
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ticket = models.ForeignKey(Ticket, on_delete=models.SET_NULL,
                                null=True, blank=True, related_name='visitor_logs')

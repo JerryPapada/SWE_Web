@@ -18,7 +18,6 @@ from .serializers import (
 
 
 class TicketViewSet(viewsets.ReadOnlyModelViewSet):
-    # read-only, users see their own tickets, managers see all
     queryset = Ticket.objects.select_related(
         'reservation', 'reservation__user',
         'reservation__showtime', 'reservation__showtime__movie',
@@ -32,10 +31,10 @@ class TicketViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['status', 'checked_in']
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        queryset = super().get_queryset()
         if not self.request.user.can_manage_venues:
-            qs = qs.filter(reservation__user=self.request.user)
-        return qs
+            queryset = queryset.filter(reservation__user=self.request.user)
+        return queryset
 
     @action(detail=False, methods=['get'])
     def my_tickets(self, request):
@@ -48,7 +47,6 @@ class TicketViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class TicketValidationView(APIView):
-    # validates a QR code without actually checking in
     permission_classes = [permissions.IsAuthenticated, IsTicketManager]
 
     @extend_schema(request=TicketValidationSerializer,
@@ -70,7 +68,6 @@ class TicketValidationView(APIView):
 
 
 class TicketCheckInView(APIView):
-    # does the actual check-in and creates a visitor log entry
     permission_classes = [permissions.IsAuthenticated, IsTicketManager]
 
     @extend_schema(request=TicketCheckInSerializer,
@@ -80,7 +77,6 @@ class TicketCheckInView(APIView):
         serializer = TicketCheckInSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # find ticket by QR or by ID
         qr_data = serializer.validated_data.get('qr_data')
         ticket_id = serializer.validated_data.get('ticket_id')
 
@@ -102,7 +98,6 @@ class TicketCheckInView(APIView):
             return Response({'success': False, 'error': msg},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        # log the entry
         VisitorLog.objects.create(
             ticket=ticket,
             first_name=ticket.reservation.user.first_name,
@@ -120,7 +115,6 @@ class TicketCheckInView(APIView):
 
 
 class VisitorLogViewSet(viewsets.ModelViewSet):
-    # managers only - visitor entry logs
     queryset = VisitorLog.objects.select_related(
         'ticket', 'showtime', 'showtime__movie',
         'showtime__room', 'logged_by'
@@ -137,11 +131,11 @@ class VisitorLogViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def by_showtime(self, request):
-        sid = request.query_params.get('showtime_id')
-        if not sid:
+        showtime_id = request.query_params.get('showtime_id')
+        if not showtime_id:
             return Response({'error': 'showtime_id is required.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        visitors = self.get_queryset().filter(showtime_id=sid)
+        visitors = self.get_queryset().filter(showtime_id=showtime_id)
         serializer = self.get_serializer(visitors, many=True)
         return Response(serializer.data)
 
@@ -154,8 +148,6 @@ class VisitorLogViewSet(viewsets.ModelViewSet):
 
 
 class VisitorRegistrationView(APIView):
-    # public endpoint - walk-in visitors register here
-    # tries to match them with an existing reservation
     permission_classes = [permissions.AllowAny]
 
     @extend_schema(request=VisitorRegistrationSerializer, responses={201: VisitorLogSerializer})
@@ -181,7 +173,6 @@ class VisitorRegistrationView(APIView):
 
 
 class VisitorSearchView(APIView):
-    # public - search for reservation by phone or email
     permission_classes = [permissions.AllowAny]
 
     @extend_schema(request=VisitorSearchSerializer, responses={200: OpenApiTypes.OBJECT})
@@ -193,35 +184,35 @@ class VisitorSearchView(APIView):
         email = serializer.validated_data.get('email')
         showtime_id = serializer.validated_data.get('showtime_id')
 
-        q = models.Q()
+        search_filter = models.Q()
         if phone:
-            q |= models.Q(user__phone=phone) | models.Q(guest_phone=phone)
+            search_filter |= models.Q(user__phone=phone) | models.Q(guest_phone=phone)
         if email:
-            q |= models.Q(user__email=email) | models.Q(guest_email=email)
+            search_filter |= models.Q(user__email=email) | models.Q(guest_email=email)
 
-        qs = Reservation.objects.filter(
-            q, status=Reservation.Status.CONFIRMED
+        reservations = Reservation.objects.filter(
+            search_filter, status=Reservation.Status.CONFIRMED
         ).select_related('showtime', 'showtime__movie', 'showtime__room')
 
         if showtime_id:
-            qs = qs.filter(showtime_id=showtime_id)
+            reservations = reservations.filter(showtime_id=showtime_id)
 
-        if not qs.exists():
+        if not reservations.exists():
             return Response({'found': False, 'message': 'No reservations found.'})
 
-        res = qs.first()
-        name = res.user.first_name if res.user else "Visitor"
+        reservation = reservations.first()
+        name = reservation.user.first_name if reservation.user else "Visitor"
 
         return Response({
             'found': True,
             'welcome_message': f"Καλως ηρθατε, {name}!",
             'reservation_details': {
-                'code': str(res.id),
-                'cinema_name': res.showtime.room.cinema.name,
-                'room_name': res.showtime.room.name,
-                'room_description': res.showtime.room.description,
-                'movie_title': res.showtime.movie.title,
-                'seats': res.seat_numbers,
-                'start_time': res.showtime.start_time,
+                'code': str(reservation.id),
+                'cinema_name': reservation.showtime.room.cinema.name,
+                'room_name': reservation.showtime.room.name,
+                'room_description': reservation.showtime.room.description,
+                'movie_title': reservation.showtime.movie.title,
+                'seats': reservation.seat_numbers,
+                'start_time': reservation.showtime.start_time,
             },
         })

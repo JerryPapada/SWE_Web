@@ -34,7 +34,6 @@ class TicketValidationSerializer(serializers.Serializer):
 
 
 class TicketCheckInSerializer(serializers.Serializer):
-    # accepts either qr_data or ticket_id
     qr_data = serializers.CharField(required=False)
     ticket_id = serializers.UUIDField(required=False)
 
@@ -61,7 +60,6 @@ class VisitorLogSerializer(serializers.ModelSerializer):
 
 
 class VisitorRegistrationSerializer(serializers.ModelSerializer):
-    # walk-in registration, tries to find a matching reservation
     class Meta:
         model = VisitorLog
         fields = ['first_name', 'last_name', 'phone', 'email', 'photo', 'showtime']
@@ -73,7 +71,6 @@ class VisitorRegistrationSerializer(serializers.ModelSerializer):
         email = validated_data.get('email')
         showtime = validated_data.get('showtime')
 
-        # try to match with existing reservation
         reservation = Reservation.objects.filter(
             showtime=showtime, status='CONFIRMED'
         ).filter(

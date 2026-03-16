@@ -1,3 +1,5 @@
-1. Create a template for django backend cinema ticket reservation software
-2. How can i create QR codes to validate entry into venue
-3. How can i send email for venue change
+Initial implementation notes
+
+1. Set up a Django backend skeleton for cinema reservations.
+2. Add QR generation/validation for ticket entry.
+3. Add email notifications when a venue/showtime change affects reservations.

@@ -1,4 +1,5 @@
 import uuid
+from django.db import transaction
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -67,35 +68,77 @@ class Reservation(models.Model):
             self.total_price = self.showtime.price * self.num_seats
         super().save(*args, **kwargs)
 
-    def confirm(self):
+    def confirm(self, changed_by=None, notes=''):
         from django.utils import timezone
-        self.status = self.Status.CONFIRMED
-        self.confirmed_at = timezone.now()
-        self.save()
-
-        # update seat count
-        self.showtime.available_seats -= self.num_seats
-        self.showtime.save()
-
-        # create ticket for this reservation
+        from apps.venues.models import Showtime
         from apps.tickets.models import Ticket
-        Ticket.objects.get_or_create(reservation=self)
+
+        if self.status == self.Status.CONFIRMED:
+            return
+        if self.status == self.Status.CANCELLED:
+            raise ValueError('Cancelled reservations cannot be confirmed.')
+
+        with transaction.atomic():
+            showtime = Showtime.objects.select_for_update().get(pk=self.showtime_id)
+            if not showtime.is_active or showtime.start_time <= timezone.now():
+                raise ValueError('Showtime is no longer available.')
+            if showtime.available_seats < self.num_seats:
+                raise ValueError('Not enough seats available.')
+
+            old_status = self.status
+            self.status = self.Status.CONFIRMED
+            self.confirmed_at = timezone.now()
+            self.save()
+
+            showtime.available_seats -= self.num_seats
+            showtime.save()
+
+            Ticket.objects.get_or_create(reservation=self)
+            self.log_status_change(old_status, self.status, changed_by=changed_by, notes=notes)
 
         self.send_confirmation_email()
 
-    def cancel(self):
+    def cancel(self, changed_by=None, notes=''):
         from django.utils import timezone
-        prev_status = self.status
-        self.status = self.Status.CANCELLED
-        self.cancelled_at = timezone.now()
-        self.save()
+        from apps.venues.models import Showtime
+        from apps.tickets.models import Ticket
 
-        # give seats back if it was confirmed
-        if prev_status == self.Status.CONFIRMED:
-            self.showtime.available_seats += self.num_seats
-            self.showtime.save()
+        with transaction.atomic():
+            previous_status = self.status
+            if previous_status == self.Status.CANCELLED:
+                return
+
+            self.status = self.Status.CANCELLED
+            self.cancelled_at = timezone.now()
+            self.save()
+
+            if previous_status == self.Status.CONFIRMED:
+                showtime = Showtime.objects.select_for_update().get(pk=self.showtime_id)
+                showtime.available_seats += self.num_seats
+                showtime.save()
+
+            ticket = getattr(self, 'ticket', None)
+            if ticket and not ticket.checked_in and ticket.status != Ticket.Status.CANCELLED:
+                ticket.status = Ticket.Status.CANCELLED
+                ticket.save()
+
+            self.log_status_change(
+                previous_status,
+                self.status,
+                changed_by=changed_by,
+                notes=notes
+            )
 
         self.send_cancellation_email()
+
+    def log_status_change(self, old_status, new_status, changed_by=None, notes=''):
+        ReservationHistory.objects.create(
+            reservation=self,
+            old_status=old_status or '',
+            new_status=new_status,
+            changed_by=changed_by,
+            notes=notes or ''
+        )
 
     def send_confirmation_email(self):
         subject = f'Reservation Confirmed - {self.showtime.movie.title}'
@@ -134,3 +177,30 @@ class Reservation(models.Model):
                       [self.user.email], fail_silently=True)
         except Exception:
             pass
+
+
+class ReservationHistory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name='history'
+    )
+    old_status = models.CharField(max_length=20, blank=True)
+    new_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('reservation history')
+        verbose_name_plural = _('reservation histories')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.reservation_id}: {self.old_status} -> {self.new_status}'

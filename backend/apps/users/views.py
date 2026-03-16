@@ -1,4 +1,3 @@
-# views για users - auth, profiles, admin management
 import os
 
 from rest_framework import generics, status, permissions
@@ -19,20 +18,18 @@ from .serializers import (
     UserProfileUpdateSerializer, ChangePasswordSerializer,
     AdminUserSerializer,
 )
-from .permissions import IsAdmin, IsAdminOrSelf
+from .permissions import IsAdmin
 
 User = get_user_model()
 
 
 class RegisterView(generics.CreateAPIView):
-    # εγγραφη νεου χρηστη
     queryset = User.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = UserRegistrationSerializer
 
 
 class ProfileView(generics.RetrieveUpdateAPIView):
-    # προφιλ τρεχοντος χρηστη
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
@@ -45,22 +42,20 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
 
 class ChangePasswordView(APIView):
-    # αλλαγη κωδικου
     permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(request=ChangePasswordSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
-        ser = ChangePasswordSerializer(data=request.data, context={'request': request})
-        ser.is_valid(raise_exception=True)
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
 
-        request.user.set_password(ser.validated_data['new_password'])
+        request.user.set_password(serializer.validated_data['new_password'])
         request.user.save()
 
         return Response({'message': 'Password changed successfully.'}, status=status.HTTP_200_OK)
 
 
 class GoogleLogin(SocialLoginView):
-    # google oauth2 μεσω allauth
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
 
@@ -74,7 +69,6 @@ class GoogleLogin(SocialLoginView):
 
 
 class AdminUserManagementViewSet(ModelViewSet):
-    # διαχειριση χρηστων - μονο για admins
     queryset = User.objects.all()
     serializer_class = AdminUserSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]

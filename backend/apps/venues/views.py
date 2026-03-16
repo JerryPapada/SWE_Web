@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 
 class CinemaViewSet(viewsets.ModelViewSet):
-    # public browsing, only managers can create/edit
     queryset = Cinema.objects.filter(is_active=True)
     serializer_class = CinemaSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -45,11 +44,11 @@ class CinemaViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def showtimes(self, request, pk=None):
         cinema = self.get_object()
-        qs = Showtime.objects.filter(
+        showtimes = Showtime.objects.filter(
             room__cinema=cinema, is_active=True,
             start_time__gte=timezone.now()
         ).select_related('movie', 'room')
-        serializer = ShowtimeCalendarSerializer(qs, many=True)
+        serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
 
@@ -72,7 +71,6 @@ class RoomViewSet(viewsets.ModelViewSet):
 
 
 class MovieViewSet(viewsets.ModelViewSet):
-    # inactive movies are hidden from regular users
     queryset = Movie.objects.all()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'original_title', 'director', 'genre']
@@ -98,17 +96,14 @@ class MovieViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def showtimes(self, request, pk=None):
         movie = self.get_object()
-        qs = movie.showtimes.filter(
+        showtimes = movie.showtimes.filter(
             is_active=True, start_time__gte=timezone.now()
         ).select_related('room', 'room__cinema')
-        serializer = ShowtimeCalendarSerializer(qs, many=True)
+        serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
 
 class ShowtimeViewSet(viewsets.ModelViewSet):
-    # on update/delete we check for affected reservations
-    # and notify users via email (assignment requirement)
-
     queryset = Showtime.objects.select_related('movie', 'room', 'room__cinema')
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['movie__title', 'room__name', 'room__cinema__name']
@@ -128,19 +123,16 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        queryset = super().get_queryset()
         date_from = self.request.query_params.get('date_from')
         date_to = self.request.query_params.get('date_to')
         if date_from:
-            qs = qs.filter(start_time__date__gte=date_from)
+            queryset = queryset.filter(start_time__date__gte=date_from)
         if date_to:
-            qs = qs.filter(start_time__date__lte=date_to)
-        return qs
-
-    # --- notification helpers ---
+            queryset = queryset.filter(start_time__date__lte=date_to)
+        return queryset
 
     def _get_affected_reservations(self, showtime):
-        # get active reservations for future showtimes only
         return Reservation.objects.filter(
             showtime=showtime,
             status__in=[Reservation.Status.CONFIRMED, Reservation.Status.PENDING],
@@ -148,28 +140,27 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         ).select_related('user', 'showtime__movie', 'showtime__room', 'showtime__room__cinema')
 
     def _send_notifications(self, reservations, reason):
-        for res in reservations:
-            subject = f"Αλλαγη στην κρατηση σας - {res.showtime.movie.title}"
+        for reservation in reservations:
+            subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
             body = (
-                f"Αγαπητε/η {res.user.get_full_name()},\n\n"
+                f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
                 f"Η κρατηση σας για την ταινια "
-                f"«{res.showtime.movie.title}» στις "
-                f"{res.showtime.start_time:%d/%m/%Y %H:%M} "
+                f"«{reservation.showtime.movie.title}» στις "
+                f"{reservation.showtime.start_time:%d/%m/%Y %H:%M} "
                 f"εχει επηρεαστει.\n\n"
                 f"Αιτια: {reason}\n\n"
-                f"Κωδικος κρατησης: {res.id}\n\n"
+                f"Κωδικος κρατησης: {reservation.id}\n\n"
                 f"Παρακαλω επικοινωνηστε μαζι μας για περισσοτερες "
                 f"πληροφοριες η για επαναπρογραμματισμο.\n\n"
                 f"Ευχαριστουμε."
             )
             try:
                 send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-                          [res.user.email], fail_silently=True)
+                          [reservation.user.email], fail_silently=True)
             except Exception:
-                logger.exception("Failed to send notification to %s", res.user.email)
+                logger.exception("Failed to send notification to %s", reservation.user.email)
 
     def _figure_out_changes(self, old_showtime, new_data):
-        # compare old showtime with incoming data to build a reason string
         changes = []
         if 'start_time' in new_data and str(old_showtime.start_time) != str(new_data['start_time']):
             changes.append("αλλαγη ωρας προβολης")
@@ -185,8 +176,6 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
             if new_data['available_seats'] < old_showtime.available_seats:
                 changes.append("μειωση διαθεσιμων θεσεων")
         return ', '.join(changes) if changes else ''
-
-    # --- overrides for update/delete ---
 
     def update(self, request, *args, **kwargs):
         showtime = self.get_object()
@@ -214,35 +203,31 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         if affected:
             reason = f"Η προβολη «{showtime.movie.title}» στις {showtime.start_time:%d/%m/%Y %H:%M} διαγραφηκε"
             self._send_notifications(affected, reason)
-            # cancel reservations so users get the refund flow
-            for res in affected:
-                res.cancel()
+            for reservation in affected:
+                reservation.cancel(changed_by=request.user, notes='Showtime removed by manager')
         return super().destroy(request, *args, **kwargs)
-
-    # --- calendar endpoints ---
 
     @action(detail=False, methods=['get'])
     def calendar(self, request):
-        qs = self.get_queryset().filter(is_active=True, start_time__gte=timezone.now())
-        serializer = ShowtimeCalendarSerializer(qs, many=True)
+        showtimes = self.get_queryset().filter(is_active=True, start_time__gte=timezone.now())
+        serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def today(self, request):
         now = timezone.now()
-        qs = self.get_queryset().filter(
+        showtimes = self.get_queryset().filter(
             is_active=True, start_time__date=now.date(), start_time__gte=now
         )
-        serializer = ShowtimeCalendarSerializer(qs, many=True)
+        serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def upcoming(self, request):
-        # next 7 days
         now = timezone.now()
-        qs = self.get_queryset().filter(
+        showtimes = self.get_queryset().filter(
             is_active=True, start_time__gte=now,
             start_time__lte=now + timedelta(days=7)
         )
-        serializer = ShowtimeCalendarSerializer(qs, many=True)
+        serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
