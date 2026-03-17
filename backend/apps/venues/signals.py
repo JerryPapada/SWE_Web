@@ -1,14 +1,13 @@
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
-from django.core.mail import send_mail
-from django.conf import settings
+from apps.notifications.email import send_email
 from .models import Room, Movie, Showtime
 
 
 def notify_affected_users(reservations, reason):
     for reservation in reservations:
         subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
-        msg = (
+        text = (
             f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
             f"Η κρατηση σας για «{reservation.showtime.movie.title}» "
             f"στις {reservation.showtime.start_time} εχει επηρεαστει "
@@ -16,11 +15,15 @@ def notify_affected_users(reservations, reason):
             f"Παρακαλω επικοινωνηστε μαζι μας.\n\n"
             f"Κωδικος κρατησης: {reservation.id}"
         )
-        try:
-            send_mail(subject, msg, settings.DEFAULT_FROM_EMAIL,
-                      [reservation.user.email], fail_silently=True)
-        except Exception:
-            pass
+        html = (
+            f"<p>Αγαπητε/η {reservation.user.get_full_name()},</p>"
+            f"<p>Η κρατηση σας για «{reservation.showtime.movie.title}» "
+            f"στις {reservation.showtime.start_time} εχει επηρεαστει "
+            f"({reason}).</p>"
+            f"<p>Παρακαλω επικοινωνηστε μαζι μας.</p>"
+            f"<p><strong>Κωδικος κρατησης:</strong> {reservation.id}</p>"
+        )
+        send_email(to=reservation.user.email, subject=subject, html=html, text=text)
 
 
 @receiver(pre_delete, sender=Room)
