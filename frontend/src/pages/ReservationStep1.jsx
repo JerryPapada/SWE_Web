@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import Header from '../components/Header';
 import NavBar from '../components/NavBar';
-import { getMovies } from '../services/movieServices.js';
+import { getMovies, getMovieShowtimes } from '../services/movieServices.js';
 import '../pages-css/ReservationStep1.css';
+import MovieCarousel from '../components/MovieCarousel';
 
 function ReservationStep1() {
     const { user } = useAuth();
@@ -13,9 +14,10 @@ function ReservationStep1() {
     const [moviesList, setMoviesList] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [selectedMovie, setSelectedMovie] = useState(null);
-    const [openDropdown, setOpenDropdown] = useState(false);
     const [cinemasList, setCinemasList] = useState([]);
     const [cinema, setCinema] = useState('');
+    const [showTimes, setShowTimes] = useState([]);
+    const [openCinemaList, setOpenCinemaList] = useState(false);
 
     let successMessage;
     if (location.state && location.state.successMsg) {
@@ -31,17 +33,31 @@ function ReservationStep1() {
             const moviesData = await getMovies();
             setMoviesList(moviesData.results);
         } catch (error) {
-            const errorData = error.response?.data || {};
-            if (errorData.non_field_errors) {
-                setDisplayMsg(errorData.non_field_errors[0]);
-                setFormErrors({ ...errorData, name: errorData.non_field_errors });
-            } else {
-                setDisplayMsg("Failed to fetch movies!");
-                setFormErrors(errorData);
-            }
+            setDisplayMsg("Failed to fetch movies!");
         }
     };
 
+    const fetchShowTimes = async (movieId) => {
+        try {
+            const showTimesData = await getMovieShowtimes(movieId);
+            const showTimes = Array.isArray(showTimesData) ? showTimesData : Object.values(showTimesData);
+            setShowTimes(showTimes);
+            const uniqueCinemas = [];
+            const cinemaNames = new Set();
+
+            showTimes.forEach(showtime => {
+                if (!cinemaNames.has(showtime.cinema_name)) {
+                    cinemaNames.add(showtime.cinema_name);
+                    uniqueCinemas.push({ name: showtime.cinema_name });
+                }
+            });
+            debugger;
+            setCinemasList(uniqueCinemas);
+            setOpenCinemaList(true);
+        } catch (error) {
+            setDisplayMsg("Failed to fetch show times!");
+        }
+    };
 
     useEffect(() => {
         if (!user) {
@@ -53,8 +69,7 @@ function ReservationStep1() {
 
     const selectMovie = (movie) => {
         setSelectedMovie(movie);
-        setOpenDropdown(true);
-
+        fetchShowTimes(movie.id);
     }
 
     return (
@@ -68,22 +83,7 @@ function ReservationStep1() {
                     <h2 className="step-instructions">Choose a movie</h2>
 
                     {moviesList.length > 0 ? (
-                        <div className="carousel-container">
-                            {moviesList.map(movie => (movie.is_active ? (
-                                <div key={movie.id} className="carousel-item" onClick={() => selectMovie(movie)}>
-                                    <div className={`home-card ${selectedMovie?.id === movie.id ? 'selected-card' : ''}`}>
-                                        <div className="home-card-image">
-                                            <img src={movie.poster || '/logo.svg'} alt={movie.title} />
-                                        </div>
-                                        <div className="home-card-info">
-                                            <h2 style={{ fontSize: '1.2rem' }}>{movie.title}</h2>
-                                        </div>
-                                    </div>
-                                </div>) : (
-                                <p style={{ color: 'white' }}>No active movies found!</p>
-                            )
-                            ))}
-                        </div>
+                        <MovieCarousel moviesList={moviesList} selectMovie={selectMovie} selectedMovie={selectedMovie} />
                     ) : (
                         <p style={{ color: 'white' }}>Loading movies...</p>
                     )}

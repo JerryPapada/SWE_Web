@@ -30,7 +30,7 @@ function MovieCard({ movie, onRefresh, onSetMsg, ratingOptions }) {
     const handleConfirmDelete = async () => {
         try {
             await deleteMovie(movie.id);
-            onSetMsg('Movie deleted successfully!');
+            onSetMsg('Success! Movie deleted successfully!');
             onRefresh();
         } catch (error) {
             onSetMsg("Failed to delete movie.");
@@ -41,7 +41,7 @@ function MovieCard({ movie, onRefresh, onSetMsg, ratingOptions }) {
         try {
             const formData = new FormData();
             formData.append('is_active', editActive);
-            
+
             if (editRating) formData.append('rating', editRating);
             if (editTrailer) formData.append('trailer_url', editTrailer);
             if (editImage) formData.append('poster', editImage);

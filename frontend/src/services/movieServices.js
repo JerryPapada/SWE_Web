@@ -42,3 +42,8 @@ export const getRatingOptions = async () => {
     const response = await api.get('venues/movies/rating-options/');
     return response.data;
 };
+
+export const getMovieShowtimes = async (movieId) => {
+    const response = await api.get(`venues/movies/${movieId}/showtimes/`);
+    return response.data;
+};

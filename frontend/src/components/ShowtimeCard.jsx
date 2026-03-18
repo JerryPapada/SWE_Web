@@ -36,7 +36,7 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
     const handleConfirmDelete = async () => {
         try {
             await deleteShowtime(showtime.id);
-            onSetMsg('Showtime deleted successfully!');
+            onSetMsg('Success!Showtime deleted successfully!');
             onRefresh();
         } catch (error) {
             onSetMsg("Failed to delete showtime.");

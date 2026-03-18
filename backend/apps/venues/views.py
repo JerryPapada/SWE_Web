@@ -37,7 +37,7 @@ class CinemaViewSet(viewsets.ModelViewSet):
         return Cinema.objects.filter(is_active=True)
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'rooms', 'showtimes']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
@@ -99,7 +99,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         return MovieSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'rating_options']:
+        if self.action in ['list', 'retrieve', 'rating_options', 'showtimes']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
