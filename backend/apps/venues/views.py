@@ -5,8 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from django.core.mail import send_mail
-from django.conf import settings
+from apps.notifications.email import send_email
 from datetime import timedelta
 
 from apps.users.permissions import IsTicketManager
@@ -163,7 +162,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
     def _send_notifications(self, reservations, reason):
         for reservation in reservations:
             subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
-            body = (
+            text = (
                 f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
                 f"Η κρατηση σας για την ταινια "
                 f"«{reservation.showtime.movie.title}» στις "
@@ -175,11 +174,20 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
                 f"πληροφοριες η για επαναπρογραμματισμο.\n\n"
                 f"Ευχαριστουμε."
             )
-            try:
-                send_mail(subject, body, settings.DEFAULT_FROM_EMAIL,
-                          [reservation.user.email], fail_silently=True)
-            except Exception:
-                logger.exception("Failed to send notification to %s", reservation.user.email)
+            html = (
+                f"<p>Αγαπητε/η {reservation.user.get_full_name()},</p>"
+                f"<p>Η κρατηση σας για την ταινια "
+                f"«{reservation.showtime.movie.title}» στις "
+                f"{reservation.showtime.start_time:%d/%m/%Y %H:%M} "
+                f"εχει επηρεαστει.</p>"
+                f"<p><strong>Αιτια:</strong> {reason}</p>"
+                f"<p><strong>Κωδικος κρατησης:</strong> {reservation.id}</p>"
+                f"<p>Παρακαλω επικοινωνηστε μαζι μας για περισσοτερες "
+                f"πληροφοριες η για επαναπρογραμματισμο.</p>"
+                f"<p>Ευχαριστουμε.</p>"
+            )
+            if not send_email(to=reservation.user.email, subject=subject, html=html, text=text):
+                logger.warning("Failed to send notification to %s", reservation.user.email)
 
     def _figure_out_changes(self, old_showtime, new_data):
         changes = []

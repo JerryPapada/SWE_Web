@@ -3,7 +3,7 @@ from django.db import transaction
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
-from django.core.mail import send_mail
+from apps.notifications.email import send_email
 
 
 class Reservation(models.Model):
@@ -142,29 +142,59 @@ class Reservation(models.Model):
 
     def send_confirmation_email(self):
         subject = f'Reservation Confirmed - {self.showtime.movie.title}'
-        msg = (
-            f'Dear {self.user.get_full_name()},\n\n'
-            f'Your reservation has been confirmed!\n\n'
+        customer_name = self.user.get_full_name() or self.user.email
+        seat_list = ', '.join(self.seat_numbers) if self.seat_numbers else str(self.num_seats)
+        room_photo_url = ''
+        if getattr(self.showtime.room, 'photo', None):
+            try:
+                room_photo_url = self.showtime.room.photo.url
+                if room_photo_url and not room_photo_url.startswith('http'):
+                    room_photo_url = f"{settings.BACKEND_URL.rstrip('/')}{room_photo_url}"
+            except Exception:
+                room_photo_url = ''
+
+        text = (
+            f'Dear {customer_name},\n\n'
+            f'Your reservation has been confirmed.\n\n'
             f'Details:\n'
             f'- Movie: {self.showtime.movie.title}\n'
             f'- Cinema: {self.showtime.room.cinema.name}\n'
             f'- Room: {self.showtime.room.name}\n'
+            f'- Room Description: {self.showtime.room.description or "-"}\n'
             f'- Date & Time: {self.showtime.start_time}\n'
-            f'- Seats: {self.num_seats}\n'
+            f'- Seats: {seat_list}\n'
             f'- Total: \u20ac{self.total_price}\n'
             f'- Reservation Code: {self.id}\n\n'
-            f'Thank you for choosing us!'
+            f'Thank you for choosing us.'
         )
-        try:
-            send_mail(subject, msg, settings.DEFAULT_FROM_EMAIL,
-                      [self.user.email], fail_silently=True)
-        except Exception:
-            pass
+        html = (
+            f"<p>Dear {customer_name},</p>"
+            f"<p>Your reservation has been confirmed.</p>"
+            f"<p><strong>Details</strong></p>"
+            f"<ul>"
+            f"<li><strong>Movie:</strong> {self.showtime.movie.title}</li>"
+            f"<li><strong>Cinema:</strong> {self.showtime.room.cinema.name}</li>"
+            f"<li><strong>Room:</strong> {self.showtime.room.name}</li>"
+            f"<li><strong>Room Description:</strong> {self.showtime.room.description or '-'}</li>"
+            f"<li><strong>Date &amp; Time:</strong> {self.showtime.start_time}</li>"
+            f"<li><strong>Seats:</strong> {seat_list}</li>"
+            f"<li><strong>Total:</strong> \u20ac{self.total_price}</li>"
+            f"<li><strong>Reservation Code:</strong> {self.id}</li>"
+            f"</ul>"
+            f"{f'<p><img src=\"{room_photo_url}\" alt=\"Room photo\" style=\"max-width: 100%;\"></p>' if room_photo_url else ''}"
+            f"<p>Thank you for choosing us.</p>"
+        )
+
+        recipients = [self.user.email]
+        if self.guest_email:
+            recipients.append(self.guest_email)
+        send_email(to=recipients, subject=subject, html=html, text=text)
 
     def send_cancellation_email(self):
         subject = f'Reservation Cancelled - {self.showtime.movie.title}'
-        msg = (
-            f'Dear {self.user.get_full_name()},\n\n'
+        customer_name = self.user.get_full_name() or self.user.email
+        text = (
+            f'Dear {customer_name},\n\n'
             f'Your reservation has been cancelled.\n\n'
             f'Details:\n'
             f'- Movie: {self.showtime.movie.title}\n'
@@ -172,11 +202,21 @@ class Reservation(models.Model):
             f'- Reservation Code: {self.id}\n\n'
             f'If you did not request this cancellation, please contact us.'
         )
-        try:
-            send_mail(subject, msg, settings.DEFAULT_FROM_EMAIL,
-                      [self.user.email], fail_silently=True)
-        except Exception:
-            pass
+        html = (
+            f"<p>Dear {customer_name},</p>"
+            f"<p>Your reservation has been cancelled.</p>"
+            f"<p><strong>Details</strong></p>"
+            f"<ul>"
+            f"<li><strong>Movie:</strong> {self.showtime.movie.title}</li>"
+            f"<li><strong>Date &amp; Time:</strong> {self.showtime.start_time}</li>"
+            f"<li><strong>Reservation Code:</strong> {self.id}</li>"
+            f"</ul>"
+            f"<p>If you did not request this cancellation, please contact us.</p>"
+        )
+        recipients = [self.user.email]
+        if self.guest_email:
+            recipients.append(self.guest_email)
+        send_email(to=recipients, subject=subject, html=html, text=text)
 
 
 class ReservationHistory(models.Model):
