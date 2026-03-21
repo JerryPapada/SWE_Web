@@ -1,16 +1,17 @@
-
 import { useAuth } from "../context/Authorisation";
 import Button from "../components/Button";
+import { Link } from "react-router-dom";
 function Header({ page, msg }) {
     const { user, logout, changePassword } = useAuth();
-    //Se periptosi pou exei kanei login na ftiaxo ena strogillo me to onoma tou xristi
 
 
     return (
 
         <header className="main-header">
             <div className="header">
-                <h1 className="header-logo">Director’s Cut</h1>
+                <Link to="/home">
+                    <img src="/logo.png" alt="logo" style={{ cursor: "pointer" }} />
+                </Link>
                 {page != "login" && page != "register" && (
                     <div className="header-container">
 

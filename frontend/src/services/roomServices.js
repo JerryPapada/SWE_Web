@@ -43,3 +43,10 @@ export const updateRoom = async (id, data, image) => {
     const response = await api.patch(`venues/rooms/${id}/`, formData);
     return response.data;
 };
+
+export const getRoom = async (roomName, cinemaName) => {
+    const response = await api.get('venues/rooms/', {
+        params: { search: `${roomName} ${cinemaName}` }
+    });
+    return response;
+};

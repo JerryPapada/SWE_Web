@@ -20,6 +20,11 @@
   border-radius: 1rem;
 }
 
+.header img {
+  height: 110px;
+
+  width: auto;
+}
 
 .textAreas,
 .inputs {
@@ -36,6 +41,15 @@
   font-size: 5rem;
   margin-left: 2rem;
   color: rgb(141, 52, 52);
+}
+
+
+
+
+
+
+.main-header {
+  background: linear-gradient(to bottom, #0d1213 0%, transparent 50%);
 }
 
 .header {
@@ -58,7 +72,7 @@
 .header-buttons p {
   margin: 0;
   white-space: nowrap;
-  color: rgb(141, 52, 52);
+  color: #a4a9ad;
   font-weight: 600;
 }
 
@@ -112,7 +126,7 @@
 .input-label {
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgb(141, 52, 52);
+  color: white;
 }
 
 .button {
@@ -120,17 +134,19 @@
   height: 2rem;
   margin-top: 0.3rem;
   border-radius: 0.2rem;
-  border: 1px solid rgb(141, 52, 52);
-  background-color: rgb(141, 52, 52);
+  border: 1px solid #76446a;
+  background-color: #76446a;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #0f172a;
-
+  color: white;
   margin-left: auto;
   margin-right: auto;
 }
 
-
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(250, 245, 91, 0.4);
+}
 
 
 .error-text {
@@ -219,6 +235,7 @@
 
 #login-body,
 #register-body {
+  position: relative;
   width: 100%;
   flex: 1;
   display: flex;
@@ -226,6 +243,10 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
+  background-image: linear-gradient(rgba(22, 30, 32, 0.3)), url("/sphere-new.png");
+  background-size: cover;
+  background-position: center 30%;
+  background-attachment: fixed;
 }
 
 #login-box,
@@ -250,7 +271,7 @@
 #register-text {
   font-size: 3rem;
   font-weight: 600;
-  color: rgb(141, 52, 52);
+  color: white;
   margin-bottom: 1.5rem;
   text-align: center;
 }
@@ -264,14 +285,14 @@
   border: 0;
   height: 1px;
   width: 100%;
-  background: rgb(141, 52, 52);
+  background: #7e406f;
 
   opacity: 0.5;
 }
 
 .page-layout {
   display: flex;
-  min-height: calc(100vh - 80px);
+  flex: 1;
   position: relative;
 }
 
@@ -305,7 +326,17 @@
 
 .navbar-open li {
   text-align: center;
-  padding: 0.4rem 0;
+  padding: 0.8rem 0;
+  margin: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-open li:hover,
+.navbar-open li:has(a.active) {
+  background-color: #7e406f;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+  transform: translateX(8px);
 }
 
 .navbar-closed li {
@@ -324,7 +355,7 @@
 
 .navbar-open a:hover {
   opacity: 1;
-  color: #ff4d4d;
+  color: #faf55b;
   transform: scale(1.05);
 }
 
@@ -344,25 +375,31 @@
   height: auto;
   padding: 0.6rem 2rem;
   border-radius: 0.2rem;
-  border: 1px solid rgb(141, 52, 52);
-  background-color: rgb(141, 52, 52);
+  border: 1px solid #7e406f;
+  background-color: #7e406f;
   font-size: 1.2rem;
   font-weight: 600;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #0f172a;
+  color: white;
   cursor: pointer;
+
+}
+
+.save-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .header-container p {
   font-size: 1.2rem;
-  color: rgb(141, 52, 52);
+  color: #a4a9ad;
 }
 
 .navbar-open {
   width: 15%;
-  background-color: #0f172a;
+  background-color: #161e20;
   transition: width 0.5s ease, background-color 0.5s ease;
   overflow: hidden;
   flex-direction: column;
@@ -392,21 +429,23 @@
 .nav-button-open {
   height: 3.5rem;
   width: 3.5rem;
-  background-color: rgb(141, 52, 52);
+  background-color: #76446a;
   border-radius: 0 0.5rem 0.5rem 0;
   left: 15%;
   position: absolute;
   transition: left 0.5s ease;
+  color: white;
 }
 
 .nav-button-closed {
   height: 3.5rem;
   width: 3.5rem;
-  background-color: rgb(141, 52, 52);
+  background-color: #76446a;
   border-radius: 0 0.5rem 0.5rem 0;
   left: 0%;
   position: absolute;
   transition: left 0.5s ease;
+  color: white
 }
 
 .page-content h1 {
@@ -414,8 +453,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  background-color: rgb(141, 52, 52);
-  color: #0f172a;
+  background-color: #7d3f6e;
+  color: white;
   margin: 0;
   padding: 0 2rem;
   height: 3.5rem;
@@ -434,8 +473,8 @@
   top: 0;
   right: 2%;
   transform: translateX(-50%);
-  background-color: rgb(141, 52, 52);
-  color: #0f172a;
+  background-color: #7d3f6e;
+  color: white;
   margin: 0;
   padding: 0 2rem;
   height: 3.5rem;
@@ -445,6 +484,14 @@
   font-size: 1.2rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   border-radius: 0 0 0.5rem 0.5rem;
+}
+
+
+.add-button:hover,
+.back-button:hover,
+.save-button:hover {
+  background-color: #7d3f6e;
+  box-shadow: 0 5px 15px #faf55b;
 }
 
 .open-add-form {
@@ -490,7 +537,7 @@
 
 .home-card,
 .card {
-  background: #1e293b;
+  background: #1b2929;
   border-radius: 1rem;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -500,7 +547,7 @@
 
 .home-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 20px #faf55b;
   cursor: pointer;
 }
 
@@ -543,6 +590,12 @@
   padding: 1.5rem;
 }
 
+.home-card-info h2 {
+  color: #6caeaf;
+  font-family: helvetica;
+  ;
+}
+
 .card-info h3 {
   margin: 0 0 0.5rem 0;
   color: white;
@@ -558,7 +611,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: rgba(15, 23, 42, 0.5);
+  background: #1b2929;
   padding: 1rem;
   border-radius: 0.5rem;
 }
@@ -649,7 +702,7 @@
   margin-top: 1rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  background-color: rgb(141, 52, 52);
+  background-color: #7e406f;
 }
 
 @media (max-width: 600px) {
@@ -695,10 +748,12 @@
     width: 80% !important;
     height: 2.5rem;
     font-size: 1.2rem;
+    font-family: helvetica;
   }
 
   #login-or {
     font-size: 1.2rem;
+    color: white;
   }
 
   .header {

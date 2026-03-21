@@ -4,9 +4,9 @@
     align-items: center;
     gap: 2rem;
     padding: 2rem;
-    background: #1e293b;
+    background: #1b2929;
     border-radius: 1rem;
-    border: 1px solid rgba(141, 52, 52, 0.3);
+    border: 1px solid #1b2929;
     color: white;
     width: 100%;
     max-width: 900px;
@@ -41,7 +41,7 @@
 .movie-info p {
     margin: 0;
     line-height: 1.5;
-    color: #cbd5e1;
+    color: #82878b;
 }
 
 .movie-info h2 {
@@ -68,13 +68,13 @@
 }
 
 .movie-stat-badge {
-    background: rgba(141, 52, 52, 0.2);
-    border: 1px solid rgb(141, 52, 52);
+    background: rgba(108, 174, 175, 0.2);
+    border: 1px solid#6caeaf;
     padding: 0.3rem 0.8rem;
     border-radius: 2rem;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #ffbaba;
+    color: #6caeaf;
 }
 
 .movie-description {
@@ -92,8 +92,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: transparent;
-    border: 2px solid rgb(141, 52, 52);
+    background-color: #7e406f;
+    border: 2px solid #7e406f;
     color: white;
     padding: 0.6rem 2rem;
     border-radius: 0.5rem;
@@ -106,7 +106,8 @@
 }
 
 .trailer-button:hover {
-    background-color: rgb(141, 52, 52);
+    background-color: #7e406f;
     transform: translateY(-2px);
     cursor: pointer;
+    box-shadow: 0 5px 15px #faf55b;
 }

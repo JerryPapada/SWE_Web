@@ -1,0 +1,450 @@
+.showtime-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.badge-2d {
+    background-color: #94a3b8;
+    color: #0f172a;
+}
+
+.badge-3d {
+    background-color: #22d3ee;
+    color: #0f172a;
+}
+
+.badge-imax {
+    background-color: #ec4899;
+    color: white;
+}
+
+.badge-atmos {
+    background-color: #6366f1;
+    color: white;
+}
+
+.carousel-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 1.5rem;
+    padding: 1.5rem 0.5rem;
+    width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: #6caeaf #0d1213;
+}
+
+.carousel-container::-webkit-scrollbar {
+    height: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 10px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb {
+    background-color: rgb(141, 52, 52);
+    border-radius: 10px;
+}
+
+.carousel-item {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+    width: 260px;
+    transition: transform 0.3s ease;
+    display: flex;
+}
+
+.carousel-item .home-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.carousel-item .home-card-info {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+.selected-card {
+    border: 3px solid#6caeaf !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(108, 174, 175, 0.4) !important;
+}
+
+.step-instructions {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.open-dropdown {
+    display: block;
+    margin-top: 2rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.open-dropdown .selects {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.open-dropdown .selects label {
+
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.open-dropdown .selects select {
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
+    font-family: 'Outfit', sans-serif;
+    color: white;
+    background-color: #1b2929;
+    border: 2px solid#6caeaf;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    appearance: none;
+    margin-bottom: 5rem;
+}
+
+.open-dropdown .selects select:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px #faf55b;
+}
+
+.open-dropdown .selects select:focus {
+    outline: none;
+}
+
+.open-dropdown .selects select option {
+    background-color: #1b2929;
+    color: white;
+    padding: 1rem;
+}
+
+.hidden {
+    display: none;
+}
+
+.showtime-card {
+    padding: 1.5rem;
+    justify-content: center;
+}
+
+
+
+.showtime-card-info {
+    flex-direction: column;
+}
+
+.showtime-date {
+    font-size: 1.3rem;
+    margin: 0.5rem 0;
+    color: #6caeaf;
+}
+
+.showtime-time {
+    font-size: 2rem;
+    margin: 0.5rem 0;
+    color: #6caeaf;
+}
+
+.showtime-room {
+    margin: 0.5rem 0 0 0;
+    color: #82878b;
+    font-size: 1rem;
+}
+
+.showtime-price {
+    margin: 0.5rem 0 0 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #82878b;
+}
+
+.showtime-seats {
+    margin: 0.5rem 0 0 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+
+}
+
+.showtime-seats-plenty {
+    color: #68c943;
+}
+
+.showtime-seats-few {
+    color: #ef4444;
+}
+
+.showtime-empty-msg {
+    color: white;
+    font-size: 1.2rem;
+    padding: 1rem;
+}
+
+.open-dates {
+    display: block;
+
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.open-next-step {
+    display: block;
+    margin-top: 2rem;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.seats-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.seats-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+    padding: 3rem;
+    background: #1b2929;
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.screen {
+    width: 80%;
+    height: 8px;
+    background-color: #ff4d4d;
+    margin: 0 0 3rem 0;
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.screen p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    position: absolute;
+    top: -25px;
+    margin: 0;
+}
+
+.seat-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.row-letter {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 600;
+    font-size: 0.9rem;
+    width: 1.5rem;
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.seat {
+    display: flex;
+}
+
+.seat-button {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px 8px 4px 4px;
+    border: none;
+    background-color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+    margin: 0;
+}
+
+.seat-button-for-show {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 8px 8px 4px 4px;
+    border: none;
+    background-color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+    margin: 0;
+}
+
+.seat-button:hover {
+    transform: scale(1.1);
+    background-color: #475569;
+}
+
+.seat-button:active {
+    transform: scale(0.95);
+}
+
+.selected-seat {
+    background-color: #68c943 !important;
+}
+
+.taken-seat {
+    background-color: #ef4444 !important;
+}
+
+.seat-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    font-size: 1.2rem;
+    margin: 0 auto 2rem auto;
+    background: #1b2929;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: fit-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.available-count {
+    color: #cbd5e1;
+}
+
+.available-count strong {
+    color: white;
+    font-size: 1.4rem;
+}
+
+.seat-legend {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.ticket-summary {
+    background-color: var(--bg-light);
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ticket-movie-info {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ticket-title {
+    font-size: 1.5rem;
+    margin: 0;
+    text-align: center;
+}
+
+.ticket-confirmation {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.ticket-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ticket-item span:first-child {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ticket-item span:last-child {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.ticket-price-section {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.ticket-price-section div {
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+.ticket-price-section hr {
+    border: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 1rem 0;
+}
+
+.ticket-price-section div:last-child {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--button-color);
+}
+
+.ticket-submit {
+    margin: 2rem auto 0;
+    display: block;
+}

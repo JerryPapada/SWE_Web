@@ -1,4 +1,4 @@
-import '../pages-css/ReservationStep1.css';
+import '../pages-css/ReservationStep.css';
 function MovieCarousel({ moviesList, selectMovie, selectedMovie }) {
     return (
         <div className="carousel-container">

@@ -150,7 +150,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(start_time__date__gte=date_from)
         if date_to:
             queryset = queryset.filter(start_time__date__lte=date_to)
-        return queryset
+        return queryset.order_by('start_time', 'movie__title', 'room__name')
 
     def _get_affected_reservations(self, showtime):
         return Reservation.objects.filter(

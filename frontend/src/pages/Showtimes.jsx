@@ -137,7 +137,7 @@ function Showtimes() {
                         <Input label="Date and Time" type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} placeholder="Date and Time" error={formErrors.start_time?.[0]} />
                         <Input label="Available Seats" type="number" value={availableSeats} disabled={true} placeholder="Available Seats" error={formErrors.available_seats?.[0]} />
                         <Input label="Price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" error={formErrors.price?.[0]} />
-                        <Input label="Is Active" type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} error={formErrors.is_active?.[0]} />
+                        <Input label="Is Active" type="checkbox" value={isActive} onChange={(e) => setIsActive(e.target.checked)} error={formErrors.is_active?.[0]} />
                         <Button text="Save Showtime" onClick={handleAddShowtime} disabled={false} type="button" className="save-button" />
                     </form>
                     <div className={showtimeForm ? "catalogue-hidden" : "catalogue-visible"}>

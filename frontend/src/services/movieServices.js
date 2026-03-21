@@ -47,3 +47,4 @@ export const getMovieShowtimes = async (movieId) => {
     const response = await api.get(`venues/movies/${movieId}/showtimes/`);
     return response.data;
 };
+

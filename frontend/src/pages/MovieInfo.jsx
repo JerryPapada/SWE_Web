@@ -54,7 +54,18 @@ function MovieInfo() {
     return (
         <>
             <Header page="movie-info" msg={displayMsg} />
-            <div className="page-layout">
+            <div
+                className="page-layout"
+                style={{
+                    ...(movie && {
+                        backgroundImage: `linear-gradient(rgba(22, 30, 32, 0.85), rgba(22, 30, 32, 0.95)), url(${movie.poster})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundAttachment: 'fixed',
+                        minHeight: '100vh',
+                    })
+                }}
+            >
                 <NavBar />
                 <main className="page-content">
                     <h1>{"Movie Information"}</h1>

@@ -141,5 +141,6 @@ class ShowtimeCalendarSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'movie_title', 'movie_poster', 'room_name',
             'cinema_name', 'start_time', 'end_time', 'price',
-            'available_seats', 'is_3d', 'is_imax', 'is_dolby_atmos'
+            'available_seats', 'is_3d', 'is_imax', 'is_dolby_atmos',
+            'is_active', 'movie', 'room'
         ]

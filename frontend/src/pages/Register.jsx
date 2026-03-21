@@ -29,6 +29,9 @@ function Register() {
             setFormErrors(error.response?.data || { detail: "Registration failed" });
         }
     };
+    const backToLogin = () => {
+        navigate('/login');
+    }
 
     return (
         <>
@@ -36,11 +39,13 @@ function Register() {
             <div id="register-body">
                 <h1 id="register-text">User Registration</h1>
                 <div id="register-box">
+                    <Button text="Back" onClick={backToLogin} type="button" className="back-button" />
                     {(formErrors.non_field_errors || formErrors.detail) && (
                         <p className="error-text-main">
                             {formErrors.non_field_errors?.[0] || formErrors.detail}
                         </p>
                     )}
+
                     <form id="register-form">
                         <Input label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="" error={formErrors.email?.[0]} />
                         <Input label="First Name" type="text" value={fnameText} onChange={(e) => setFnameText(e.target.value)} placeholder="" error={formErrors.first_name?.[0]} />
