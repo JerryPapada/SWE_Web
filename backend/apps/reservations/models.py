@@ -14,11 +14,14 @@ class Reservation(models.Model):
         COMPLETED = 'COMPLETED', _('Completed')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='reservations'
     )
+    
     showtime = models.ForeignKey(
         'venues.Showtime',
         on_delete=models.CASCADE,
@@ -26,12 +29,14 @@ class Reservation(models.Model):
     )
 
     num_seats = models.PositiveIntegerField(_('number of seats'), default=1)
+    
     seat_numbers = models.JSONField(
         _('seat numbers'),
         default=list,
         blank=True,
         help_text=_('List of reserved seat identifiers (e.g. ["A1", "A2"])')
     )
+    
     total_price = models.DecimalField(
         _('total price'),
         max_digits=10,
@@ -68,116 +73,152 @@ class Reservation(models.Model):
             self.total_price = self.showtime.price * self.num_seats
         super().save(*args, **kwargs)
 
-    def confirm(self, changed_by=None, notes=''):
-        from django.utils import timezone
-        from apps.venues.models import Showtime
-        from apps.venues.models import ShowtimeSeat
-        from apps.tickets.models import Ticket
-
+    def _validate_can_confirm(self):
         if self.status == self.Status.CONFIRMED:
-            return
+            return False
         if self.status == self.Status.CANCELLED:
             raise ValueError('Cancelled reservations cannot be confirmed.')
+        return True
+
+    def _lock_showtime(self):
+        from apps.venues.models import Showtime
+        # We lock the showtime row to avoid seat races under concurrent checkouts.
+        return Showtime.objects.select_for_update().get(pk=self.showtime_id)
+
+    def _ensure_showtime_available(self, showtime):
+        from django.utils import timezone
+        if not showtime.is_active or showtime.start_time <= timezone.now():
+            raise ValueError('Showtime is no longer available.')
+        if showtime.available_seats < self.num_seats:
+            raise ValueError('Not enough seats available.')
+
+    def _mark_confirmed(self):
+        from django.utils import timezone
+        old_status = self.status
+        self.status = self.Status.CONFIRMED
+        self.confirmed_at = timezone.now()
+        self.save()
+        return old_status
+
+    def _decrease_showtime_seats(self, showtime):
+        showtime.available_seats -= self.num_seats
+        showtime.save()
+
+    def _assign_seats(self, showtime):
+        from django.utils import timezone
+        from apps.venues.models import ShowtimeSeat
+
+        ShowtimeSeat.generate_for_showtime(showtime)
+
+        seat_numbers = list(self.seat_numbers or [])
+        if seat_numbers:
+            if len(seat_numbers) != self.num_seats:
+                raise ValueError('Seat count does not match number of seats.')
+            if len(set(seat_numbers)) != len(seat_numbers):
+                raise ValueError('Duplicate seat numbers are not allowed.')
+
+            seats_qs = ShowtimeSeat.objects.select_for_update().filter(
+                showtime=showtime,
+                seat_number__in=seat_numbers
+            )
+            if seats_qs.count() != len(seat_numbers):
+                raise ValueError('One or more selected seats are invalid.')
+            if seats_qs.filter(is_reserved=True).exists():
+                raise ValueError('One or more selected seats are already taken.')
+            seats_qs.update(
+                is_reserved=True,
+                reserved_at=timezone.now(),
+                reservation=self
+            )
+            return seat_numbers
+
+        available_seats = list(
+            ShowtimeSeat.objects.select_for_update()
+            .filter(showtime=showtime, is_reserved=False)
+            .order_by('row_index', 'seat_index')[:self.num_seats]
+        )
+        if len(available_seats) < self.num_seats:
+            raise ValueError('Not enough seats available.')
+        seat_numbers = [seat.seat_number for seat in available_seats]
+        self.seat_numbers = seat_numbers
+        self.save(update_fields=['seat_numbers'])
+        ShowtimeSeat.objects.filter(
+            id__in=[seat.id for seat in available_seats]
+        ).update(
+            is_reserved=True,
+            reserved_at=timezone.now(),
+            reservation=self
+        )
+        return seat_numbers
+
+    def _create_tickets(self, seat_numbers):
+        from apps.tickets.models import Ticket
+        for seat_number in seat_numbers:
+            Ticket.objects.get_or_create(
+                reservation=self,
+                seat_number=seat_number
+            )
+
+    def confirm(self, changed_by=None, notes=''):
+        if not self._validate_can_confirm():
+            return
 
         with transaction.atomic():
-            showtime = Showtime.objects.select_for_update().get(pk=self.showtime_id)
-            if not showtime.is_active or showtime.start_time <= timezone.now():
-                raise ValueError('Showtime is no longer available.')
-            if showtime.available_seats < self.num_seats:
-                raise ValueError('Not enough seats available.')
+            showtime = self._lock_showtime()
+            self._ensure_showtime_available(showtime)
 
-            ShowtimeSeat.generate_for_showtime(showtime)
+            old_status = self._mark_confirmed()
+            self._decrease_showtime_seats(showtime)
 
-            old_status = self.status
-            self.status = self.Status.CONFIRMED
-            self.confirmed_at = timezone.now()
-            self.save()
-
-            showtime.available_seats -= self.num_seats
-            showtime.save()
-
-            seat_numbers = list(self.seat_numbers or [])
-            if seat_numbers:
-                if len(seat_numbers) != self.num_seats:
-                    raise ValueError('Seat count does not match number of seats.')
-                if len(set(seat_numbers)) != len(seat_numbers):
-                    raise ValueError('Duplicate seat numbers are not allowed.')
-
-                seats_qs = ShowtimeSeat.objects.select_for_update().filter(
-                    showtime=showtime,
-                    seat_number__in=seat_numbers
-                )
-                if seats_qs.count() != len(seat_numbers):
-                    raise ValueError('One or more selected seats are invalid.')
-                if seats_qs.filter(is_reserved=True).exists():
-                    raise ValueError('One or more selected seats are already taken.')
-                seats_qs.update(
-                    is_reserved=True,
-                    reserved_at=timezone.now(),
-                    reservation=self
-                )
-            else:
-                available_seats = list(
-                    ShowtimeSeat.objects.select_for_update()
-                    .filter(showtime=showtime, is_reserved=False)
-                    .order_by('row_index', 'seat_index')[:self.num_seats]
-                )
-                if len(available_seats) < self.num_seats:
-                    raise ValueError('Not enough seats available.')
-                seat_numbers = [seat.seat_number for seat in available_seats]
-                self.seat_numbers = seat_numbers
-                self.save(update_fields=['seat_numbers'])
-                ShowtimeSeat.objects.filter(
-                    id__in=[seat.id for seat in available_seats]
-                ).update(
-                    is_reserved=True,
-                    reserved_at=timezone.now(),
-                    reservation=self
-                )
-
-            for seat_number in seat_numbers:
-                Ticket.objects.get_or_create(
-                    reservation=self,
-                    seat_number=seat_number
-                )
+            seat_numbers = self._assign_seats(showtime)
+            self._create_tickets(seat_numbers)
             self.log_status_change(old_status, self.status, changed_by=changed_by, notes=notes)
 
+        # Email is intentionally outside the transaction; failures shouldn't roll back seats.
         self.send_confirmation_email()
 
-    def cancel(self, changed_by=None, notes=''):
+    def _mark_cancelled(self):
         from django.utils import timezone
-        from apps.venues.models import Showtime
+        self.status = self.Status.CANCELLED
+        self.cancelled_at = timezone.now()
+        self.save()
+
+    def _release_seats_if_needed(self, showtime):
         from apps.venues.models import ShowtimeSeat
+        showtime.available_seats += self.num_seats
+        showtime.save()
+        ShowtimeSeat.objects.filter(
+            showtime=showtime,
+            reservation=self
+        ).update(
+            is_reserved=False,
+            reserved_at=None,
+            reservation=None
+        )
+
+    def _cancel_tickets(self):
         from apps.tickets.models import Ticket
+        for ticket in self.tickets.all():
+            if not ticket.checked_in and ticket.status != Ticket.Status.CANCELLED:
+                ticket.status = Ticket.Status.CANCELLED
+                ticket.save()
+
+    def cancel(self, changed_by=None, notes=''):
+        from apps.venues.models import Showtime
 
         with transaction.atomic():
             previous_status = self.status
             if previous_status == self.Status.CANCELLED:
                 return
 
-            self.status = self.Status.CANCELLED
-            self.cancelled_at = timezone.now()
-            self.save()
+            self._mark_cancelled()
 
             if previous_status == self.Status.CONFIRMED:
                 showtime = Showtime.objects.select_for_update().get(pk=self.showtime_id)
-                showtime.available_seats += self.num_seats
-                showtime.save()
+                # Seat release happens only for confirmed reservations.
+                self._release_seats_if_needed(showtime)
 
-                ShowtimeSeat.objects.filter(
-                    showtime=showtime,
-                    reservation=self
-                ).update(
-                    is_reserved=False,
-                    reserved_at=None,
-                    reservation=None
-                )
-
-            for ticket in self.tickets.all():
-                if not ticket.checked_in and ticket.status != Ticket.Status.CANCELLED:
-                    ticket.status = Ticket.Status.CANCELLED
-                    ticket.save()
-
+            self._cancel_tickets()
             self.log_status_change(
                 previous_status,
                 self.status,
@@ -185,6 +226,7 @@ class Reservation(models.Model):
                 notes=notes
             )
 
+        # Keep email after commit so UI stays fast even if email is slow.
         self.send_cancellation_email()
 
     def log_status_change(self, old_status, new_status, changed_by=None, notes=''):
