@@ -71,6 +71,7 @@ class Reservation(models.Model):
     def confirm(self, changed_by=None, notes=''):
         from django.utils import timezone
         from apps.venues.models import Showtime
+        from apps.venues.models import ShowtimeSeat
         from apps.tickets.models import Ticket
 
         if self.status == self.Status.CONFIRMED:
@@ -85,6 +86,8 @@ class Reservation(models.Model):
             if showtime.available_seats < self.num_seats:
                 raise ValueError('Not enough seats available.')
 
+            ShowtimeSeat.generate_for_showtime(showtime)
+
             old_status = self.status
             self.status = self.Status.CONFIRMED
             self.confirmed_at = timezone.now()
@@ -93,7 +96,50 @@ class Reservation(models.Model):
             showtime.available_seats -= self.num_seats
             showtime.save()
 
-            Ticket.objects.get_or_create(reservation=self)
+            seat_numbers = list(self.seat_numbers or [])
+            if seat_numbers:
+                if len(seat_numbers) != self.num_seats:
+                    raise ValueError('Seat count does not match number of seats.')
+                if len(set(seat_numbers)) != len(seat_numbers):
+                    raise ValueError('Duplicate seat numbers are not allowed.')
+
+                seats_qs = ShowtimeSeat.objects.select_for_update().filter(
+                    showtime=showtime,
+                    seat_number__in=seat_numbers
+                )
+                if seats_qs.count() != len(seat_numbers):
+                    raise ValueError('One or more selected seats are invalid.')
+                if seats_qs.filter(is_reserved=True).exists():
+                    raise ValueError('One or more selected seats are already taken.')
+                seats_qs.update(
+                    is_reserved=True,
+                    reserved_at=timezone.now(),
+                    reservation=self
+                )
+            else:
+                available_seats = list(
+                    ShowtimeSeat.objects.select_for_update()
+                    .filter(showtime=showtime, is_reserved=False)
+                    .order_by('row_index', 'seat_index')[:self.num_seats]
+                )
+                if len(available_seats) < self.num_seats:
+                    raise ValueError('Not enough seats available.')
+                seat_numbers = [seat.seat_number for seat in available_seats]
+                self.seat_numbers = seat_numbers
+                self.save(update_fields=['seat_numbers'])
+                ShowtimeSeat.objects.filter(
+                    id__in=[seat.id for seat in available_seats]
+                ).update(
+                    is_reserved=True,
+                    reserved_at=timezone.now(),
+                    reservation=self
+                )
+
+            for seat_number in seat_numbers:
+                Ticket.objects.get_or_create(
+                    reservation=self,
+                    seat_number=seat_number
+                )
             self.log_status_change(old_status, self.status, changed_by=changed_by, notes=notes)
 
         self.send_confirmation_email()
@@ -101,6 +147,7 @@ class Reservation(models.Model):
     def cancel(self, changed_by=None, notes=''):
         from django.utils import timezone
         from apps.venues.models import Showtime
+        from apps.venues.models import ShowtimeSeat
         from apps.tickets.models import Ticket
 
         with transaction.atomic():
@@ -117,10 +164,19 @@ class Reservation(models.Model):
                 showtime.available_seats += self.num_seats
                 showtime.save()
 
-            ticket = getattr(self, 'ticket', None)
-            if ticket and not ticket.checked_in and ticket.status != Ticket.Status.CANCELLED:
-                ticket.status = Ticket.Status.CANCELLED
-                ticket.save()
+                ShowtimeSeat.objects.filter(
+                    showtime=showtime,
+                    reservation=self
+                ).update(
+                    is_reserved=False,
+                    reserved_at=None,
+                    reservation=None
+                )
+
+            for ticket in self.tickets.all():
+                if not ticket.checked_in and ticket.status != Ticket.Status.CANCELLED:
+                    ticket.status = Ticket.Status.CANCELLED
+                    ticket.save()
 
             self.log_status_change(
                 previous_status,

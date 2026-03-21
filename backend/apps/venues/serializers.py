@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
-from .models import Cinema, Room, Movie, Showtime
+from .models import Cinema, Room, Movie, Showtime, ShowtimeSeat
 
 
 class CinemaSerializer(serializers.ModelSerializer):
@@ -143,3 +143,13 @@ class ShowtimeCalendarSerializer(serializers.ModelSerializer):
             'cinema_name', 'start_time', 'end_time', 'price',
             'available_seats', 'is_3d', 'is_imax', 'is_dolby_atmos'
         ]
+
+
+class ShowtimeSeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShowtimeSeat
+        fields = [
+            'id', 'seat_number', 'row_label', 'row_index', 'seat_index',
+            'is_reserved'
+        ]
+        read_only_fields = fields

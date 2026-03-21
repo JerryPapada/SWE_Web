@@ -10,14 +10,14 @@ class TicketSerializer(serializers.ModelSerializer):
     cinema_name = serializers.CharField(source='reservation.showtime.room.cinema.name', read_only=True)
     room_name = serializers.CharField(source='reservation.showtime.room.name', read_only=True)
     showtime = serializers.DateTimeField(source='reservation.showtime.start_time', read_only=True)
-    seat_numbers = serializers.JSONField(source='reservation.seat_numbers', read_only=True)
+    seat_number = serializers.CharField(read_only=True)
 
     class Meta:
         model = Ticket
         fields = [
             'id', 'reservation_id', 'user_email',
             'movie_title', 'cinema_name', 'room_name',
-            'showtime', 'seat_numbers',
+            'showtime', 'seat_number',
             'qr_code', 'qr_data', 'status',
             'checked_in', 'checked_in_at',
             'created_at', 'updated_at'
@@ -78,8 +78,10 @@ class VisitorRegistrationSerializer(serializers.ModelSerializer):
             models.Q(guest_phone=phone) | models.Q(guest_email=email)
         ).first()
 
-        if reservation and hasattr(reservation, 'ticket'):
-            validated_data['ticket'] = reservation.ticket
+        if reservation:
+            ticket = reservation.tickets.filter(checked_in=False).first()
+            if ticket:
+                validated_data['ticket'] = ticket
 
         return super().create(validated_data)
 

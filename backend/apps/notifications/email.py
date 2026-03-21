@@ -1,5 +1,4 @@
 import logging
-
 import resend
 from django.conf import settings
 
