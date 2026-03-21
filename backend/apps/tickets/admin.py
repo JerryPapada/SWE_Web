@@ -5,12 +5,12 @@ from .models import Ticket, VisitorLog
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     list_display = [
-        'id', 'get_user', 'get_movie', 'status',
+        'id', 'seat_number', 'get_user', 'get_movie', 'status',
         'checked_in', 'checked_in_at', 'created_at'
     ]
     list_filter = ['status', 'checked_in', 'created_at']
     search_fields = [
-        'id', 'qr_data',
+        'id', 'qr_data', 'seat_number',
         'reservation__user__email',
         'reservation__showtime__movie__title'
     ]

@@ -15,11 +15,13 @@ class Ticket(models.Model):
         CANCELLED = 'CANCELLED', _('Cancelled')
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    reservation = models.OneToOneField(
+    reservation = models.ForeignKey(
         'reservations.Reservation',
         on_delete=models.CASCADE,
-        related_name='ticket'
+        related_name='tickets'
     )
+
+    seat_number = models.CharField(_('seat number'), max_length=20)
 
     qr_code = models.ImageField(_('QR code'), upload_to='tickets/qr/', blank=True, null=True)
     qr_data = models.CharField(_('QR data'), max_length=500, unique=True, editable=False)
@@ -41,9 +43,15 @@ class Ticket(models.Model):
         verbose_name = _('ticket')
         verbose_name_plural = _('tickets')
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['reservation', 'seat_number'],
+                name='uniq_ticket_reservation_seat'
+            )
+        ]
 
     def __str__(self):
-        return f'Ticket {self.id} - {self.reservation}'
+        return f'Ticket {self.id} - {self.reservation} - Seat {self.seat_number}'
 
     def save(self, *args, **kwargs):
         if not self.qr_data:

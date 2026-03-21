@@ -15,6 +15,7 @@ from .serializers import (
     CinemaSerializer, RoomSerializer, RoomDetailSerializer,
     MovieSerializer, MovieListSerializer,
     ShowtimeSerializer, ShowtimeDetailSerializer, ShowtimeCalendarSerializer,
+    ShowtimeSeatSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -138,7 +139,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         return ShowtimeSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'calendar', 'today', 'upcoming']:
+        if self.action in ['list', 'retrieve', 'calendar', 'today', 'upcoming', 'seats']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
@@ -151,6 +152,13 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         if date_to:
             queryset = queryset.filter(start_time__date__lte=date_to)
         return queryset.order_by('start_time', 'movie__title', 'room__name')
+
+    @action(detail=True, methods=['get'])
+    def seats(self, request, pk=None):
+        showtime = self.get_object()
+        seats = showtime.seats.all()
+        serializer = ShowtimeSeatSerializer(seats, many=True)
+        return Response(serializer.data)
 
     def _get_affected_reservations(self, showtime):
         return Reservation.objects.filter(

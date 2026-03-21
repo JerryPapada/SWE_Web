@@ -24,11 +24,11 @@ class TicketTests(BaseAPITestCase):
             user=self.regular_user,
             showtime=self.showtime,
             num_seats=1,
+            seat_numbers=['A1'],
             total_price=10.00,
-            status=Reservation.Status.CONFIRMED
         )
-        # Ticket is auto-created in some implementations, but let's ensure it exists
-        self.ticket, _ = Ticket.objects.get_or_create(reservation=self.reservation)
+        self.reservation.confirm(changed_by=self.manager_user, notes='Test setup')
+        self.ticket = self.reservation.tickets.first()
 
     def test_my_tickets(self):
         url = reverse('ticket-my-tickets')

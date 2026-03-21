@@ -4,7 +4,7 @@ from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from drf_spectacular.types import OpenApiTypes
 
-from apps.venues.models import Showtime
+from apps.venues.models import Showtime, ShowtimeSeat
 from apps.venues.serializers import ShowtimeCalendarSerializer
 from .models import Reservation, ReservationHistory
 
@@ -57,11 +57,34 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         showtime = data.get('showtime')
         seats = data.get('num_seats', 1)
+        seat_numbers = list(data.get('seat_numbers') or [])
 
         if showtime.available_seats < seats:
             raise serializers.ValidationError({
                 'num_seats': f'Only {showtime.available_seats} seats available.'
             })
+        if seat_numbers:
+            if len(seat_numbers) != seats:
+                raise serializers.ValidationError({
+                    'seat_numbers': 'Seat count must match number of seats.'
+                })
+            if len(set(seat_numbers)) != len(seat_numbers):
+                raise serializers.ValidationError({
+                    'seat_numbers': 'Duplicate seat numbers are not allowed.'
+                })
+            ShowtimeSeat.generate_for_showtime(showtime)
+            seats_qs = ShowtimeSeat.objects.filter(
+                showtime=showtime,
+                seat_number__in=seat_numbers
+            )
+            if seats_qs.count() != len(seat_numbers):
+                raise serializers.ValidationError({
+                    'seat_numbers': 'One or more selected seats are invalid.'
+                })
+            if seats_qs.filter(is_reserved=True).exists():
+                raise serializers.ValidationError({
+                    'seat_numbers': 'One or more selected seats are already taken.'
+                })
         return data
 
     def create(self, validated_data):
@@ -113,7 +136,7 @@ class MyReservationsSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.BOOL)
     def get_has_ticket(self, obj):
-        return hasattr(obj, 'ticket')
+        return obj.tickets.exists()
 
 
 class ReservationHistorySerializer(serializers.ModelSerializer):

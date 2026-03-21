@@ -3,7 +3,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator
 
-
 class Cinema(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(_('name'), max_length=200)
@@ -194,6 +193,7 @@ class Showtime(models.Model):
                 raise ValidationError(_('This room is already occupied by another showtime during this period.'))
 
     def save(self, *args, **kwargs):
+        is_new = self._state.adding
         # We call clean() manually since Django doesn't do it on save()
         self.clean()
 
@@ -207,6 +207,9 @@ class Showtime(models.Model):
             self.is_dolby_atmos = (self.room.room_type == Room.RoomType.DOLBY_ATMOS)
         
         super().save(*args, **kwargs)
+
+        if is_new:
+            ShowtimeSeat.generate_for_showtime(self)
     
     @property
     def is_sold_out(self):
@@ -217,3 +220,83 @@ class Showtime(models.Model):
         if self.room.capacity == 0:
             return 0
         return ((self.room.capacity - self.available_seats) / self.room.capacity) * 100
+
+
+class ShowtimeSeat(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    showtime = models.ForeignKey(
+        Showtime,
+        on_delete=models.CASCADE,
+        related_name='seats'
+    )
+    seat_number = models.CharField(_('seat number'), max_length=20)
+    row_label = models.CharField(_('row label'), max_length=10)
+    row_index = models.PositiveIntegerField(_('row index'))
+    seat_index = models.PositiveIntegerField(_('seat index'))
+
+    is_reserved = models.BooleanField(_('is reserved'), default=False)
+    reserved_at = models.DateTimeField(_('reserved at'), null=True, blank=True)
+    reservation = models.ForeignKey(
+        'reservations.Reservation',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='reserved_seats'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('showtime seat')
+        verbose_name_plural = _('showtime seats')
+        ordering = ['row_index', 'seat_index']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['showtime', 'seat_number'],
+                name='uniq_showtime_seat_number'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.showtime} - {self.seat_number}'
+
+    @staticmethod
+    def _row_label(row_index):
+        if row_index < 26:
+            return chr(ord('A') + row_index)
+        return f'R{row_index + 1}'
+
+    @classmethod
+    def generate_for_showtime(cls, showtime):
+        if showtime.seats.exists():
+            return
+        room = showtime.room
+        if not room:
+            return
+
+        total_capacity = room.capacity
+        rows = room.rows
+        seats_per_row = room.seats_per_row
+
+        seats = []
+        created = 0
+        for row_index in range(rows):
+            row_label = cls._row_label(row_index)
+            for seat_index in range(1, seats_per_row + 1):
+                if created >= total_capacity:
+                    break
+                seat_number = f'{row_label}{seat_index}'
+                seats.append(cls(
+                    showtime=showtime,
+                    seat_number=seat_number,
+                    row_label=row_label,
+                    row_index=row_index,
+                    seat_index=seat_index
+                ))
+                created += 1
+            if created >= total_capacity:
+                break
+
+        if seats:
+            cls.objects.bulk_create(seats)
