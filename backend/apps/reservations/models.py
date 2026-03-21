@@ -265,6 +265,7 @@ class Reservation(models.Model):
             f'- Reservation Code: {self.id}\n\n'
             f'Thank you for choosing us.'
         )
+        img_html = f'<p><img src="{room_photo_url}" alt="Room photo" style="max-width: 100%;"></p>' if room_photo_url else ""
         html = (
             f"<p>Dear {customer_name},</p>"
             f"<p>Your reservation has been confirmed.</p>"
@@ -279,7 +280,7 @@ class Reservation(models.Model):
             f"<li><strong>Total:</strong> \u20ac{self.total_price}</li>"
             f"<li><strong>Reservation Code:</strong> {self.id}</li>"
             f"</ul>"
-            f"{f'<p><img src=\"{room_photo_url}\" alt=\"Room photo\" style=\"max-width: 100%;\"></p>' if room_photo_url else ''}"
+            f"{img_html}"
             f"<p>Thank you for choosing us.</p>"
         )
 

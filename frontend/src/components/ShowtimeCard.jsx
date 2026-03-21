@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { deleteShowtime, updateShowtime } from '../services/showtimeServices.js';
 import Input from './Input';
 import { useAuth } from '../context/Authorisation';
+import '../pages-css/ReservationStep.css';
 
 function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
     const [showConfirm, setShowConfirm] = useState(false);
@@ -69,9 +70,11 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
             <div className="card-info">
                 {isEditing ? (
                     <div className="edit-form-inline">
+                        <h3 style={{ marginBottom: "0.5rem" }}>Editing: {showtime.movie_title}</h3>
+                        <p className="card-items" style={{ marginBottom: "1rem" }}>{showtime.cinema_name} - {showtime.room_name}</p>
                         <Input label="Date and Time" type="datetime-local" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
                         <Input label="Price" type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
-                        <Input label="Is Active" type="checkbox" checked={editActive} onChange={(e) => setEditActive(e.target.checked)} />
+                        <Input label="Is Active" type="checkbox" value={editActive} onChange={(e) => setEditActive(e.target.checked)} />
                         <div className="edit-actions-inline">
                             <button className="confirm-button yes" onClick={handleUpdate}>Save</button>
                             <button className="confirm-button no" onClick={toggleEdit}>Cancel</button>
@@ -85,11 +88,11 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
                         <p className="card-items" style={{ marginBottom: "0.5rem" }}>Price: € {showtime.price}</p>
                         <p className="card-items" style={{ marginBottom: "0.5rem" }}>Available Seats: {showtime.available_seats}</p>
 
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                            {!showtime.is_3d && !showtime.is_imax && !showtime.is_dolby_atmos && <span style={{ backgroundColor: '#94a3b8', color: '#0f172a', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>2D</span>}
-                            {showtime.is_3d && <span style={{ backgroundColor: '#22d3ee', color: '#0f172a', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>3D</span>}
-                            {showtime.is_imax && <span style={{ backgroundColor: '#ec4899', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>IMAX</span>}
-                            {showtime.is_dolby_atmos && <span style={{ backgroundColor: '#6366f1', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>DOLBY ATMOS</span>}
+                        <div className="showtime-badges">
+                            {!showtime.is_3d && !showtime.is_imax && !showtime.is_dolby_atmos && <span className="badge badge-2d">2D</span>}
+                            {showtime.is_3d && <span className="badge badge-3d">3D</span>}
+                            {showtime.is_imax && <span className="badge badge-imax">IMAX</span>}
+                            {showtime.is_dolby_atmos && <span className="badge badge-atmos">DOLBY ATMOS</span>}
                         </div>
 
                         <div>

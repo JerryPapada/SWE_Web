@@ -8,6 +8,7 @@ import { useAuth } from '../context/Authorisation';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 import { useTimedMessage } from "../hooks/HeaderMessage.js";
+
 function Login() {
 
     const [email, setEmail] = useState('');
@@ -80,7 +81,7 @@ function Login() {
                     <Input label="Insert Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" error={formErrors.password?.[0]} />
                     <Button text="Login" onClick={handleLogin} disabled={false} type="submit" className="button" />
                     <p id="login-or">OR</p>
-                    <Button text="Login with Google" onClick={googleLogin} disabled={false} type="submit" className="button" />
+                    <Button text="Login with Google" onClick={googleLogin} disabled={false} type="submit" className="button google-button" />
                     <p id="login-or">If you don't have an Account</p>
                     <Button text="Register" onClick={userRegistration} disabled={false} type="submit" className="button" />
                 </div>

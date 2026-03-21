@@ -21,17 +21,10 @@
 
 }
 
-#login-welcome-text {
-    font-size: 3rem;
-    font-weight: 600;
-    color: rgb(141, 52, 52);
-    margin-bottom: 1.5rem;
-    text-align: center;
-}
 
 #login-or {
     font-size: 1.1rem;
-    color: rgb(141, 52, 52);
+    color: white;
     margin-top: 1rem;
     margin-bottom: 0.5rem;
 }
@@ -47,7 +40,17 @@
     text-align: center;
 }
 
+.google-button {
+    background: linear-gradient(to right, #faf55b, #6caeaf, #7d3f6e) !important;
+    border: none !important;
+    color: white !important;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
 
+.google-button:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(250, 245, 91, 0.4);
+}
 
 @media (max-width: 600px) {
     #login-box {
@@ -56,9 +59,7 @@
         max-width: 90%;
     }
 
-    #login-welcome-text {
-        font-size: 1.25rem;
-    }
+
 
     .button {
         width: 100% !important;

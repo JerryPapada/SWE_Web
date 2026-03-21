@@ -1,23 +1,35 @@
 import { useAuth } from '../context/Authorisation';
-import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
 import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import Header from '../components/Header';
 import NavBar from '../components/NavBar';
 import { getMovies, getMovieShowtimes } from '../services/movieServices.js';
-import '../pages-css/ReservationStep1.css';
+import '../pages-css/ReservationStep.css';
 import MovieCarousel from '../components/MovieCarousel';
+import Select from '../components/Select';
+import ShowtimeCarousel from '../components/ShowtimeCarousel';
+import Button from '../components/Button';
+
 
 function ReservationStep1() {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [moviesList, setMoviesList] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const [selectedMovie, setSelectedMovie] = useState(null);
-    const [cinemasList, setCinemasList] = useState([]);
+    const [selectedShowTime, setSelectedShowTime] = useState(null);
+    let [cinemasList, setCinemasList] = useState([]);
     const [cinema, setCinema] = useState('');
     const [showTimes, setShowTimes] = useState([]);
-    const [openCinemaList, setOpenCinemaList] = useState(false);
+    const cinemaSelectRef = useRef(null);
+    const datesSelectRef = useRef(null);
+    const nextStepRef = useRef(null);
+    let [openCinemaList, setOpenCinemaList] = useState(false);
+    let [openDates, setOpenDates] = useState(false);
+    let [openNextStep, setOpenNextStep] = useState(false);
+
 
     let successMessage;
     if (location.state && location.state.successMsg) {
@@ -25,7 +37,7 @@ function ReservationStep1() {
     } else {
         successMessage = null;
     }
-    const [displayMsg, setDisplayMsg] = useTimedMessage();
+    const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
 
     const fetchMovies = async () => {
         try {
@@ -48,12 +60,13 @@ function ReservationStep1() {
             showTimes.forEach(showtime => {
                 if (!cinemaNames.has(showtime.cinema_name)) {
                     cinemaNames.add(showtime.cinema_name);
-                    uniqueCinemas.push({ name: showtime.cinema_name });
+                    uniqueCinemas.push({ value: showtime.cinema_name, label: showtime.cinema_name });
                 }
             });
             debugger;
             setCinemasList(uniqueCinemas);
             setOpenCinemaList(true);
+            openCinemaList = true;
         } catch (error) {
             setDisplayMsg("Failed to fetch show times!");
         }
@@ -67,9 +80,43 @@ function ReservationStep1() {
         }
     }, [user]);
 
+    useEffect(() => {
+        if (openCinemaList && cinemaSelectRef.current) {
+            cinemaSelectRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [selectedMovie]);
+
+    useEffect(() => {
+        if (openDates && datesSelectRef.current) {
+            datesSelectRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [openDates]);
+
+    useEffect(() => {
+        if (openNextStep && nextStepRef.current) {
+            nextStepRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [openNextStep]);
+
     const selectMovie = (movie) => {
         setSelectedMovie(movie);
+        setCinema('');
         fetchShowTimes(movie.id);
+        setOpenDates(false);
+        setOpenNextStep(false);
+
+    }
+    const selectDates = () => {
+        setOpenDates(true);
+    }
+
+    const selectShowTime = (showtime) => {
+        setSelectedShowTime(showtime);
+        setOpenNextStep(true);
+    }
+
+    const nextStep = () => {
+        navigate('/reservations-step-2', { state: { selectedShowTime, selectedMovie, cinema } });
     }
 
     return (
@@ -87,10 +134,16 @@ function ReservationStep1() {
                     ) : (
                         <p style={{ color: 'white' }}>Loading movies...</p>
                     )}
-                    {/* TODO: Add cinemas */}
-                    {/* <div className={openDropdown ? "open-dropdown" : "close-dropdown"}>
-                        <Select label="Select a Cinema" value={cinema} onChange={(e) => setCinema(e.target.value)} error={formErrors.cinema?.[0]} options={cinemaOptions} />
-                    </div> */}
+                    <div ref={cinemaSelectRef} className={openCinemaList ? "open-dropdown" : "hidden"}>
+                        <Select label="Select a Cinema" value={cinema} onChange={(e) => { debugger; setCinema(e.target.value); selectDates(); }} error={formErrors.cinema ? formErrors.cinema[0] : undefined} options={cinemasList} />
+                    </div>
+                    <div ref={datesSelectRef} className={openDates ? "open-dates" : "hidden"}>
+                        <h2>Choose a Date</h2>
+                        <ShowtimeCarousel showTimes={showTimes} cinema={cinema} selectedMovie={selectedMovie} selectShowTime={selectShowTime} selectedShowTime={selectedShowTime} />
+                    </div>
+                    <div ref={nextStepRef} className={openNextStep ? "open-next-step" : "hidden"}>
+                        <Button onClick={() => nextStep()} type="submit" className="save-button" text="Next Step -&gt;">   </Button>
+                    </div>
                 </main>
             </div>
         </>
