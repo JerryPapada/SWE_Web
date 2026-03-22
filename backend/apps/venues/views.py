@@ -99,7 +99,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         return MovieSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'rating_options', 'showtimes']:
+        if self.action in ['list', 'retrieve', 'rating_options', 'genre_options', 'showtimes']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
@@ -112,6 +112,11 @@ class MovieViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='rating-options')
     def rating_options(self, request):
         choices = [{'value': k, 'label': str(v)} for k, v in Movie.Rating.choices]
+        return Response({'results': choices})
+
+    @action(detail=False, methods=['get'], url_path='genre-options')
+    def genre_options(self, request):
+        choices = [{'value': k, 'label': str(v)} for k, v in Movie.Genre.choices]
         return Response({'results': choices})
 
     @action(detail=True, methods=['get'])
@@ -169,6 +174,11 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 
     def _send_notifications(self, reservations, reason):
         for reservation in reservations:
+            recipients = [reservation.user.email]
+            if reservation.guest_email:
+                recipients.append(reservation.guest_email)
+            recipients = list(dict.fromkeys(recipients))
+
             subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
             text = (
                 f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
@@ -194,8 +204,14 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
                 f"πληροφοριες η για επαναπρογραμματισμο.</p>"
                 f"<p>Ευχαριστουμε.</p>"
             )
-            if not send_email(to=reservation.user.email, subject=subject, html=html, text=text):
-                logger.warning("Failed to send notification to %s", reservation.user.email)
+            if not send_email(to=recipients, subject=subject, html=html, text=text):
+                logger.warning("Failed to send notification to %s", recipients)
+
+    def _format_time_change_reason(self, old_time, new_time):
+        return (
+            "αλλαγη ωρας προβολης "
+            f"({old_time:%d/%m/%Y %H:%M} -> {new_time:%d/%m/%Y %H:%M})"
+        )
 
     def _figure_out_changes(self, old_showtime, new_data):
         changes = []
@@ -216,8 +232,14 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         showtime = self.get_object()
+        old_start_time = showtime.start_time
         reason = self._figure_out_changes(showtime, request.data)
         response = super().update(request, *args, **kwargs)
+        showtime.refresh_from_db()
+
+        if showtime.start_time != old_start_time:
+            time_reason = self._format_time_change_reason(old_start_time, showtime.start_time)
+            reason = f"{time_reason}, {reason}" if reason else time_reason
         if reason:
             affected = self._get_affected_reservations(showtime)
             if affected.exists():
@@ -226,8 +248,14 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         showtime = self.get_object()
+        old_start_time = showtime.start_time
         reason = self._figure_out_changes(showtime, request.data)
         response = super().partial_update(request, *args, **kwargs)
+        showtime.refresh_from_db()
+
+        if showtime.start_time != old_start_time:
+            time_reason = self._format_time_change_reason(old_start_time, showtime.start_time)
+            reason = f"{time_reason}, {reason}" if reason else time_reason
         if reason:
             affected = self._get_affected_reservations(showtime)
             if affected.exists():
