@@ -179,55 +179,53 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
                 recipients.append(reservation.guest_email)
             recipients = list(dict.fromkeys(recipients))
 
-            subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
+            subject = f"Change in your reservation - {reservation.showtime.movie.title}"
             text = (
-                f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
-                f"Η κρατηση σας για την ταινια "
-                f"«{reservation.showtime.movie.title}» στις "
+                f"Dear {reservation.user.get_full_name()},\n\n"
+                f"Your reservation for the movie "
+                f"«{reservation.showtime.movie.title}» on "
                 f"{reservation.showtime.start_time:%d/%m/%Y %H:%M} "
-                f"εχει επηρεαστει.\n\n"
-                f"Αιτια: {reason}\n\n"
-                f"Κωδικος κρατησης: {reservation.id}\n\n"
-                f"Παρακαλω επικοινωνηστε μαζι μας για περισσοτερες "
-                f"πληροφοριες η για επαναπρογραμματισμο.\n\n"
-                f"Ευχαριστουμε."
+                f"has been affected.\n\n"
+                f"Reason: {reason}\n\n"
+                f"Reservation ID: {reservation.id}\n\n"
+                f"Please contact us for more information or to reschedule.\n\n"
+                f"Thank you."
             )
             html = (
-                f"<p>Αγαπητε/η {reservation.user.get_full_name()},</p>"
-                f"<p>Η κρατηση σας για την ταινια "
-                f"«{reservation.showtime.movie.title}» στις "
+                f"<p>Dear {reservation.user.get_full_name()},</p>"
+                f"<p>Your reservation for the movie "
+                f"«{reservation.showtime.movie.title}» on "
                 f"{reservation.showtime.start_time:%d/%m/%Y %H:%M} "
-                f"εχει επηρεαστει.</p>"
-                f"<p><strong>Αιτια:</strong> {reason}</p>"
-                f"<p><strong>Κωδικος κρατησης:</strong> {reservation.id}</p>"
-                f"<p>Παρακαλω επικοινωνηστε μαζι μας για περισσοτερες "
-                f"πληροφοριες η για επαναπρογραμματισμο.</p>"
-                f"<p>Ευχαριστουμε.</p>"
+                f"has been affected.</p>"
+                f"<p><strong>Reason:</strong> {reason}</p>"
+                f"<p><strong>Reservation ID:</strong> {reservation.id}</p>"
+                f"<p>Please contact us for more information or to reschedule.</p>"
+                f"<p>Thank you.</p>"
             )
             if not send_email(to=recipients, subject=subject, html=html, text=text):
                 logger.warning("Failed to send notification to %s", recipients)
 
     def _format_time_change_reason(self, old_time, new_time):
         return (
-            "αλλαγη ωρας προβολης "
+            "change in showtime "
             f"({old_time:%d/%m/%Y %H:%M} -> {new_time:%d/%m/%Y %H:%M})"
         )
 
     def _figure_out_changes(self, old_showtime, new_data):
         changes = []
         if 'start_time' in new_data and str(old_showtime.start_time) != str(new_data['start_time']):
-            changes.append("αλλαγη ωρας προβολης")
+            changes.append("change in showtime")
         if 'room' in new_data and str(old_showtime.room_id) != str(new_data['room']):
-            changes.append("αλλαγη αιθουσας")
+            changes.append("change in room")
         if 'movie' in new_data and str(old_showtime.movie_id) != str(new_data['movie']):
-            changes.append("αλλαγη ταινιας")
+            changes.append("change in movie")
         if 'price' in new_data and old_showtime.price != new_data['price']:
-            changes.append("αλλαγη τιμης")
+            changes.append("change in price")
         if 'is_active' in new_data and old_showtime.is_active and not new_data['is_active']:
-            changes.append("ακυρωση προβολης")
+            changes.append("change in active status")
         if 'available_seats' in new_data:
             if new_data['available_seats'] < old_showtime.available_seats:
-                changes.append("μειωση διαθεσιμων θεσεων")
+                changes.append("change in available seats")
         return ', '.join(changes) if changes else ''
 
     def update(self, request, *args, **kwargs):
@@ -266,7 +264,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         showtime = self.get_object()
         affected = list(self._get_affected_reservations(showtime))
         if affected:
-            reason = f"Η προβολη «{showtime.movie.title}» στις {showtime.start_time:%d/%m/%Y %H:%M} διαγραφηκε"
+            reason = f"The showtime for «{showtime.movie.title}» on {showtime.start_time:%d/%m/%Y %H:%M} has been removed."
             self._send_notifications(affected, reason)
             for reservation in affected:
                 reservation.cancel(changed_by=request.user, notes='Showtime removed by manager')

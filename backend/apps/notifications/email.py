@@ -4,7 +4,6 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 
 logger = logging.getLogger(__name__)
 
-
 def _normalize_recipients(to):
     if not to:
         return []

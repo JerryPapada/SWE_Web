@@ -6,22 +6,22 @@ from .models import Room, Movie, Showtime
 
 def notify_affected_users(reservations, reason):
     for reservation in reservations:
-        subject = f"Αλλαγη στην κρατηση σας - {reservation.showtime.movie.title}"
+        subject = f"Change in your reservation - {reservation.showtime.movie.title}"
         text = (
-            f"Αγαπητε/η {reservation.user.get_full_name()},\n\n"
-            f"Η κρατηση σας για «{reservation.showtime.movie.title}» "
-            f"στις {reservation.showtime.start_time} εχει επηρεαστει "
+            f"Dear {reservation.user.get_full_name()},\n\n"
+            f"Your reservation for «{reservation.showtime.movie.title}» "
+            f"on {reservation.showtime.start_time} has been affected "
             f"({reason}).\n\n"
-            f"Παρακαλω επικοινωνηστε μαζι μας.\n\n"
-            f"Κωδικος κρατησης: {reservation.id}"
+            f"Please contact us.\n\n"
+            f"Reservation ID: {reservation.id}"
         )
         html = (
-            f"<p>Αγαπητε/η {reservation.user.get_full_name()},</p>"
-            f"<p>Η κρατηση σας για «{reservation.showtime.movie.title}» "
-            f"στις {reservation.showtime.start_time} εχει επηρεαστει "
+            f"<p>Dear {reservation.user.get_full_name()},</p>"
+            f"<p>Your reservation for «{reservation.showtime.movie.title}» "
+            f"on {reservation.showtime.start_time} has been affected "
             f"({reason}).</p>"
-            f"<p>Παρακαλω επικοινωνηστε μαζι μας.</p>"
-            f"<p><strong>Κωδικος κρατησης:</strong> {reservation.id}</p>"
+            f"<p>Please contact us.</p>"
+            f"<p><strong>Reservation ID:</strong> {reservation.id}</p>"
         )
         send_email(to=reservation.user.email, subject=subject, html=html, text=text)
 

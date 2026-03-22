@@ -8,4 +8,4 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         # Register signals
-        from . import signals  # noqa: F401
+        from . import signals

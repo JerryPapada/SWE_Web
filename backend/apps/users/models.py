@@ -9,7 +9,13 @@ class UserManager(BaseUserManager):
         if not email:
             raise ValueError(_('The Email field must be set'))
         email = self.normalize_email(email)
+        roles = extra_fields.get('roles')
         user = self.model(email=email, **extra_fields)
+        if roles:
+            # Ensure primary role exists in roles list
+            if user.role not in roles:
+                roles = list(roles) + [user.role]
+            user.roles = list(dict.fromkeys(roles))
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -18,6 +24,7 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', User.Role.ADMIN)
+        extra_fields.setdefault('roles', [User.Role.ADMIN])
         
         if extra_fields.get('is_staff') is not True:
             raise ValueError(_('Superuser must have is_staff=True.'))
@@ -50,6 +57,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Role.choices,
         default=Role.USER
     )
+    roles = models.JSONField(
+        _('roles'),
+        default=list,
+        blank=True,
+        help_text=_('List of roles for this user. Primary role is stored in `role`.')
+    )
     
     is_active = models.BooleanField(_('active'), default=True)
     is_staff = models.BooleanField(_('staff status'), default=False)
@@ -78,16 +91,37 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_admin(self):
-        return self.role == self.Role.ADMIN
+        return self.has_role(self.Role.ADMIN)
 
     @property
     def is_ticket_manager(self):
-        return self.role == self.Role.TICKET_MANAGER
+        return self.has_role(self.Role.TICKET_MANAGER)
 
     @property
     def can_manage_venues(self):
-        return self.role in [self.Role.ADMIN, self.Role.TICKET_MANAGER]
+        return self.has_any_role([self.Role.ADMIN, self.Role.TICKET_MANAGER])
 
     @property
     def can_make_reservations(self):
         return self.is_active
+
+    def get_roles(self):
+        roles = set(self.roles or [])
+        if self.role:
+            roles.add(self.role)
+        return roles
+
+    def has_role(self, role):
+        return role in self.get_roles()
+
+    def has_any_role(self, roles):
+        return bool(self.get_roles().intersection(set(roles)))
+
+    def save(self, *args, **kwargs):
+        # Keep roles in sync with primary role
+        if self.role:
+            roles = list(self.roles or [])
+            if self.role not in roles:
+                roles.append(self.role)
+            self.roles = roles
+        super().save(*args, **kwargs)
