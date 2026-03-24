@@ -5,6 +5,7 @@ import { useTimedMessage } from "../hooks/HeaderMessage.js";
 import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 import Button from "../components/Button";
+import Input from "../components/Input";
 import '../pages-css/ReservationStep.css';
 import { setReservation } from '../services/reservationService';
 
@@ -22,6 +23,7 @@ function ReservationStep3() {
         successMessage = null;
     }
     const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
+    const [sendEmail, setSendEmail] = useState(false);
 
 
     useEffect(() => {
@@ -35,9 +37,9 @@ function ReservationStep3() {
     const handleConfirmReservation = async () => {
         try {
             debugger;
-            const reservationResponse = await setReservation(selectedShowTime.id, seatsArray.length, seatsArray);
+            const reservationResponse = await setReservation(selectedShowTime.id, seatsArray.length, seatsArray, sendEmail);
             debugger;
-            setDisplayMsg("Success! Your reservation has been confirmed!");
+            navigate('/reservations-step-4', { state: { ...location.state, reservationResponse, successMsg: "Success! Your reservation has been confirmed!" } });
         } catch (error) {
             setDisplayMsg("There was a problem with the reservation. Please try again.")
         }
@@ -88,9 +90,9 @@ function ReservationStep3() {
                                     <span>Time</span>
                                     <span>{formattedTime}</span>
                                 </div>
-                                <div className="ticket-item" style={{ gridColumn: '1 / -1' }}>
+                                <div className="ticket-item ticket-seats-item">
                                     <span>Selected Seats</span>
-                                    <span style={{ color: '#22d3ee', letterSpacing: '2px' }}>
+                                    <span className="selected-seats-text">
                                         {seatsArray.join(', ')}
                                     </span>
                                 </div>
@@ -106,6 +108,9 @@ function ReservationStep3() {
                                     <span>Total Amount</span>
                                     <span>€{totalPrice}</span>
                                 </div>
+                            </div>
+                            <div className="email-confirmation">
+                                <Input type="checkbox" label="Send tickets via email" value={sendEmail} onChange={(e) => setSendEmail(e.target.checked)} />
                             </div>
                         </div>
                         <Button className="save-button ticket-submit" type="button" text="Confirm & Pay" onClick={handleConfirmReservation} />
