@@ -80,16 +80,38 @@ class AdminUserManagementViewSet(ModelViewSet):
     def assign_role(self, request, pk=None):
         user = self.get_object()
         role = request.data.get('role')
+        roles = request.data.get('roles')
 
-        if role not in dict(User.Role.choices):
+        valid_roles = dict(User.Role.choices)
+        if roles is not None:
+            if not isinstance(roles, (list, tuple)):
+                return Response({'error': 'Roles must be a list.'}, status=status.HTTP_400_BAD_REQUEST)
+            invalid = [r for r in roles if r not in valid_roles]
+            if invalid:
+                return Response(
+                    {'error': f'Invalid roles. Choose from: {list(valid_roles)}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.roles = list(dict.fromkeys(roles))
+            if user.role not in user.roles and user.roles:
+                user.role = user.roles[0]
+            user.save()
+            return Response({'message': f'Roles updated for {user.email}.', 'roles': user.roles},
+                            status=status.HTTP_200_OK)
+
+        if role not in valid_roles:
             return Response(
-                {'error': f'Invalid role. Choose from: {list(User.Role.choices)}'},
+                {'error': f'Invalid role. Choose from: {list(valid_roles)}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.role = role
+        roles_set = set(user.roles or [])
+        roles_set.add(role)
+        user.roles = list(roles_set)
+        user.role = role if user.role != role else user.role
         user.save()
-        return Response({'message': f'Role {role} assigned to {user.email}'}, status=status.HTTP_200_OK)
+        return Response({'message': f'Role {role} assigned to {user.email}', 'roles': user.roles},
+                        status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
     def deactivate(self, request, pk=None):

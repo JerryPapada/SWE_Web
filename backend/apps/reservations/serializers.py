@@ -8,7 +8,6 @@ from apps.venues.models import Showtime, ShowtimeSeat
 from apps.venues.serializers import ShowtimeCalendarSerializer
 from .models import Reservation, ReservationHistory
 
-
 class ReservationSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.get_full_name', read_only=True)
@@ -33,11 +32,13 @@ class ReservationSerializer(serializers.ModelSerializer):
 
 
 class ReservationCreateSerializer(serializers.ModelSerializer):
+    send_email = serializers.BooleanField(write_only=True, required=False, default=True)
+
     class Meta:
         model = Reservation
         fields = [
             'showtime', 'num_seats', 'seat_numbers',
-            'guest_email', 'guest_phone', 'notes'
+            'guest_email', 'guest_phone', 'notes', 'send_email'
         ]
 
     def to_representation(self, instance):
@@ -79,6 +80,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'seat_numbers': 'Duplicate seat numbers are not allowed.'
                 })
+            
             ShowtimeSeat.generate_for_showtime(showtime)
             seats_qs = ShowtimeSeat.objects.filter(
                 showtime=showtime,
@@ -96,6 +98,7 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context['request']
+        send_email = validated_data.pop('send_email', True)
         num_seats = validated_data.get('num_seats', 1)
         showtime_id = validated_data['showtime'].id
 
@@ -116,7 +119,11 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             reservation = Reservation.objects.create(**validated_data)
 
             try:
-                reservation.confirm(changed_by=request.user, notes='Created via booking form')
+                reservation.confirm(
+                    changed_by=request.user,
+                    notes='Created via booking form',
+                    send_email=send_email
+                )
             except ValueError as exc:
                 raise serializers.ValidationError({'detail': str(exc)}) from exc
         return reservation

@@ -89,13 +89,25 @@ class Movie(models.Model):
         PG13 = 'PG-13', _('Parents Strongly Cautioned')
         R = 'R', _('Restricted')
         NC17 = 'NC-17', _('Adults Only')
+
+    class Genre(models.TextChoices):
+        ACTION = 'ACTION', _('Action')
+        COMEDY = 'COMEDY', _('Comedy')
+        DRAMA = 'DRAMA', _('Drama')
+        THRILLER = 'THRILLER', _('Thriller')
+        HORROR = 'HORROR', _('Horror')
+        ROMANCE = 'ROMANCE', _('Romance')
+        SCI_FI = 'SCI_FI', _('Sci-Fi')
+        FANTASY = 'FANTASY', _('Fantasy')
+        ANIMATION = 'ANIMATION', _('Animation')
+        DOCUMENTARY = 'DOCUMENTARY', _('Documentary')
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(_('title'), max_length=300)
     original_title = models.CharField(_('original title'), max_length=300, blank=True)
     description = models.TextField(_('description'))
     duration_minutes = models.PositiveIntegerField(_('duration (minutes)'))
-    genre = models.CharField(_('genre'), max_length=100)
+    genre = models.CharField(_('genre'), max_length=100, choices=Genre.choices)
     director = models.CharField(_('director'), max_length=200, blank=True)
     cast = models.TextField(_('cast'), blank=True)
     rating = models.CharField(

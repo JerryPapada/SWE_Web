@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -13,6 +13,13 @@ services:
       - DATABASE_URL=postgres://cinema_user:cinema_password@db:5432/cinema_db
       - SECRET_KEY=dev-secret-key-change-in-production
       - DJANGO_SETTINGS_MODULE=config.settings.development
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_HOST_USER=app2001.mail.noreply@gmail.com
+      - EMAIL_HOST_PASSWORD=esikvhqlieilosrs 
+      - EMAIL_USE_TLS=true
+      - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+
     depends_on:
       db:
         condition: service_healthy

@@ -2,4 +2,4 @@ Initial implementation notes
 
 1. Set up a Django backend skeleton for cinema reservations.
 2. Add QR generation/validation for ticket entry.
-3. Add email notifications when a venue/showtime change affects reservations with resend tool
+3. Add email notifications when a venue/showtime change affects reservations with gmail

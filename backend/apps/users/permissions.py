@@ -8,7 +8,7 @@ class IsAdmin(permissions.BasePermission):
         return (
             request.user and
             request.user.is_authenticated and
-            request.user.role == 'ADMIN'
+            request.user.has_role('ADMIN')
         )
 
 
@@ -19,7 +19,7 @@ class IsTicketManager(permissions.BasePermission):
         return (
             request.user and
             request.user.is_authenticated and
-            request.user.role in ['ADMIN', 'TICKET_MANAGER']
+            request.user.has_any_role(['ADMIN', 'TICKET_MANAGER'])
         )
 
 
@@ -30,7 +30,7 @@ class IsAdminOrSelf(permissions.BasePermission):
         return (
             request.user and
             request.user.is_authenticated and
-            (request.user.role == 'ADMIN' or obj == request.user)
+            (request.user.has_role('ADMIN') or obj == request.user)
         )
 
 
@@ -44,5 +44,5 @@ class IsOwnerOrAdmin(permissions.BasePermission):
         return (
             request.user and
             request.user.is_authenticated and
-            (request.user.role == 'ADMIN' or obj.user == request.user)
+            (request.user.has_role('ADMIN') or obj.user == request.user)
         )

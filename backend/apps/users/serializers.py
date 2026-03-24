@@ -12,10 +12,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name',
-            'phone', 'photo', 'role', 'is_active', 'created_at',
+            'phone', 'photo', 'role', 'roles', 'is_active', 'created_at',
             'has_password'
         ]
-        read_only_fields = ['id', 'role', 'is_active', 'created_at']
+        read_only_fields = ['id', 'role', 'roles', 'is_active', 'created_at']
 
     def get_has_password(self, obj):
         return obj.has_usable_password()
@@ -90,7 +90,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'password', 'password_confirm',
-            'phone', 'photo', 'role', 'is_active',
+            'phone', 'photo', 'role', 'roles', 'is_active',
             'is_staff', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
@@ -98,11 +98,19 @@ class AdminUserSerializer(serializers.ModelSerializer):
     def validate(self, data):
         password = data.get('password')
         password_confirm = data.get('password_confirm')
+        roles = data.get('roles')
 
         if password and password != password_confirm:
             raise serializers.ValidationError({
                 'password_confirm': 'Passwords do not match.'
             })
+        if roles is not None:
+            if not isinstance(roles, (list, tuple)):
+                raise serializers.ValidationError({'roles': 'Roles must be a list.'})
+            valid_roles = set([choice[0] for choice in User.Role.choices])
+            invalid = [r for r in roles if r not in valid_roles]
+            if invalid:
+                raise serializers.ValidationError({'roles': f'Invalid roles: {invalid}'})
         return data
 
     def create(self, validated_data):
@@ -111,3 +119,11 @@ class AdminUserSerializer(serializers.ModelSerializer):
         if password:
             return User.objects.create_user(**validated_data, password=password)
         return User.objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        roles = validated_data.get('roles')
+        role = validated_data.get('role')
+        if roles is not None and role and role not in roles:
+            roles = list(roles) + [role]
+            validated_data['roles'] = roles
+        return super().update(instance, validated_data)
