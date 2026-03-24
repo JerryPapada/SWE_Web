@@ -16,7 +16,7 @@ export const setReservation = async (showtimeId, numberOfTickets, seats) => {
 
 export const getReservationsSeats = async (showtimeId) => {
     try {
-        const response = await api.get(`reservations/${showtimeId}/seats/`);
+        const response = await api.get(`venues/showtimes/${showtimeId}/seats/`);
         debugger;
         return response.data;
     } catch (error) {

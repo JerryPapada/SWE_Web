@@ -40,6 +40,13 @@ class ReservationCreateSerializer(serializers.ModelSerializer):
             'guest_email', 'guest_phone', 'notes'
         ]
 
+    def to_representation(self, instance):
+        from apps.tickets.serializers import TicketSerializer
+        return {
+            'id': str(instance.id),
+            'tickets': TicketSerializer(instance.tickets.all(), many=True).data
+        }
+
     def validate_showtime(self, value):
         if not value.is_active:
             raise serializers.ValidationError('This showtime is not available.')

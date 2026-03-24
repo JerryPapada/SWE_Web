@@ -18,6 +18,7 @@ function ReservationStep2() {
     const [formErrors, setFormErrors] = useState({});
     const [reservation, setReservation] = useState({});
     const [selectedSeats, setSelectedSeats] = useState(new Set());
+    const [unavailableSeats, setUnavailableSeats] = useState([]);
 
     const getRoomSeats = async () => {
         try {
@@ -43,6 +44,18 @@ function ReservationStep2() {
         }
         setSelectedSeats(newSelectedSeats);
     }
+    const getUnavailableSeats = async () => {
+        try {
+            debugger;
+            const response = await getReservationsSeats(selectedShowTime.id);
+            const allSeatsData = Array.isArray(response) ? response : (response?.results || []);
+            const reservedSeats = allSeatsData.filter(seat => seat.is_reserved).map(seat => seat.seat_number);
+            setUnavailableSeats(reservedSeats);
+        } catch (error) {
+            setDisplayMsg('Error fetching the unavailable seats!');
+
+        }
+    };
 
     let successMessage;
     if (location.state && location.state.successMsg) {
@@ -57,6 +70,7 @@ function ReservationStep2() {
             navigate('/login', { state: { successMsg: 'You have logged out!' } });
         } else if (selectedShowTime) {
             getRoomSeats();
+            getUnavailableSeats();
         }
     }, [user, selectedShowTime]);
 
@@ -93,7 +107,7 @@ function ReservationStep2() {
                     </div>
                     <div className="seat-layout">
                         {room.length > 0 ? (
-                            <SeatsBox room={room} showtime={selectedShowTime} selectSeats={selectSeats} selectedSeats={selectedSeats} />
+                            <SeatsBox room={room} showtime={selectedShowTime} selectSeats={selectSeats} unavailableSeats={unavailableSeats} selectedSeats={selectedSeats} />
                         ) : (
                             <p>Loading seats...</p>
                         )}

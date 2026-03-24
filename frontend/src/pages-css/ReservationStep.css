@@ -322,10 +322,12 @@
 
 .selected-seat {
     background-color: #68c943 !important;
+    cursor: pointer;
 }
 
 .taken-seat {
     background-color: #ef4444 !important;
+    cursor: not-allowed;
 }
 
 .seat-info {

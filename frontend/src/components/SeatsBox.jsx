@@ -1,6 +1,6 @@
 import '../pages-css/ReservationStep.css';
 
-function SeatsBox({ room, showtime, selectSeats, selectedSeats }) {
+function SeatsBox({ room, showtime, selectSeats, unavailableSeats, selectedSeats }) {
 
     const rows = room[0].rows;
     const seatsPerRow = room[0].seats_per_row;
@@ -22,7 +22,14 @@ function SeatsBox({ room, showtime, selectSeats, selectedSeats }) {
                             <span className="row-letter">{rowLetter}</span>
                             {Array.from({ length: seatsPerRow }).map((_, j) => (
                                 <span key={`seat-${i}-${j}`} className="seat">
-                                    <button className={`seat-button ${selectedSeats.has(`${rowLetter}${j + 1}`) ? 'selected-seat' : ''}`} type="button" id={`seat-${i}-${j}`} value={`${rowLetter}${j + 1}`} onClick={() => selectSeats(`${rowLetter}${j + 1}`)}></button>
+                                    <button 
+                                        className={`seat-button ${selectedSeats.has(`${rowLetter}${j + 1}`) ? 'selected-seat' : ''} ${unavailableSeats.includes(`${rowLetter}${j + 1}`) ? 'taken-seat' : ''}`} 
+                                        type="button" 
+                                        id={`seat-${i}-${j}`} 
+                                        value={`${rowLetter}${j + 1}`} 
+                                        onClick={() => selectSeats(`${rowLetter}${j + 1}`)}
+                                        disabled={unavailableSeats.includes(`${rowLetter}${j + 1}`)}
+                                    ></button>
                                 </span>
                             ))}
                         </div>

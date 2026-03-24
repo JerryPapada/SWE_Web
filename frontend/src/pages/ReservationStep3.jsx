@@ -36,6 +36,7 @@ function ReservationStep3() {
         try {
             debugger;
             const reservationResponse = await setReservation(selectedShowTime.id, seatsArray.length, seatsArray);
+            debugger;
             setDisplayMsg("Success! Your reservation has been confirmed!");
         } catch (error) {
             setDisplayMsg("There was a problem with the reservation. Please try again.")
