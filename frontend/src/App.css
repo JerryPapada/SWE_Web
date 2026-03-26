@@ -24,6 +24,7 @@
   height: 110px;
 
   width: auto;
+  cursor: pointer;
 }
 
 .textAreas,
@@ -322,6 +323,12 @@
   padding: 0;
   margin: 0 0 2rem 0;
   width: 100%;
+}
+
+.navbar-open .nav-bottom-list,
+.navbar-closed .nav-bottom-list {
+  margin-top: 4rem;
+  margin-bottom: 2rem;
 }
 
 .navbar-open li {
@@ -640,6 +647,11 @@
 
 .card-button.edit {
   background: #334155;
+  color: white;
+}
+
+.card-button.info {
+  background: #7e406f;
   color: white;
 }
 

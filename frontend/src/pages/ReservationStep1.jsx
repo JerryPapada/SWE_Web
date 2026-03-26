@@ -41,7 +41,6 @@ function ReservationStep1() {
 
     const fetchMovies = async () => {
         try {
-            debugger;
             const moviesData = await getMovies();
             setMoviesList(moviesData.results);
         } catch (error) {
@@ -63,7 +62,6 @@ function ReservationStep1() {
                     uniqueCinemas.push({ value: showtime.cinema_name, label: showtime.cinema_name });
                 }
             });
-            debugger;
             setCinemasList(uniqueCinemas);
             setOpenCinemaList(true);
             openCinemaList = true;
@@ -135,7 +133,7 @@ function ReservationStep1() {
                         <p style={{ color: 'white' }}>Loading movies...</p>
                     )}
                     <div ref={cinemaSelectRef} className={openCinemaList ? "open-dropdown" : "hidden"}>
-                        <Select label="Select a Cinema" value={cinema} onChange={(e) => { debugger; setCinema(e.target.value); selectDates(); }} error={formErrors.cinema ? formErrors.cinema[0] : undefined} options={cinemasList} />
+                        <Select label="Select a Cinema" value={cinema} onChange={(e) => { setCinema(e.target.value); selectDates(); }} error={formErrors.cinema ? formErrors.cinema[0] : undefined} options={cinemasList} />
                     </div>
                     <div ref={datesSelectRef} className={openDates ? "open-dates" : "hidden"}>
                         <h2>Choose a Date</h2>

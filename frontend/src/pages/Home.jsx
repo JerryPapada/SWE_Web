@@ -32,9 +32,7 @@ function Home() {
 
     const fetchMovies = async () => {
         try {
-            debugger;
             const moviesData = await getMovies();
-            debugger;
             setMoviesList(moviesData.results);
         } catch (error) {
             setDisplayMsg("Failed to fetch movies!");

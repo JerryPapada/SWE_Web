@@ -10,7 +10,7 @@ function Header({ page, msg }) {
         <header className="main-header">
             <div className="header">
                 <Link to="/home">
-                    <img src="/logo.png" alt="logo" style={{ cursor: "pointer" }} />
+                    <img src="/logo.png" alt="logo" />
                 </Link>
                 {page != "login" && page != "register" && (
                     <div className="header-container">

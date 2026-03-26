@@ -3,6 +3,7 @@ import { deleteMovie, updateMovie } from '../services/movieServices.js';
 import Input from './Input';
 import Select from './Select';
 import { useAuth } from '../context/Authorisation';
+import '../pages-css/MovieInfo.css';
 
 function MovieCard({ movie, onRefresh, onSetMsg, ratingOptions }) {
     const [showConfirm, setShowConfirm] = useState(false);
@@ -83,9 +84,9 @@ function MovieCard({ movie, onRefresh, onSetMsg, ratingOptions }) {
                     <>
                         <h3>{movie.title}</h3>
                         <p className="card-items">Duration: {movie.duration_minutes} minutes</p>
-                        <div>
+                        <div className="movie-card-status">
                             <span>Rating: {getRatingLabel(movie.rating)}</span>
-                            <span style={{ color: movie.is_active ? '#22c55e' : '#ef4444', marginLeft: '1rem' }}>
+                            <span className={movie.is_active ? 'status-active' : 'status-inactive'}>
                                 Status: {movie.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </div>

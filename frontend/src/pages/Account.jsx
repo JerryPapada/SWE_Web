@@ -11,6 +11,7 @@ import { updateUserForm } from '../services/userServices.js';
 import { changePassword } from '../services/authServices.js';
 import Input from '../components/Input.jsx';
 import Button from '../components/Button.jsx';
+import '../pages-css/Account.css';
 
 function Account() {
     const { user, setUser } = useAuth();
@@ -30,11 +31,14 @@ function Account() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
+    const [photo, setPhoto] = useState(null);
+    const [photoUrl, setPhotoUrl] = useState('');
     const [phone, setPhone] = useState('');
     const [hasPassword, setHasPassword] = useState(false);
     const [settings, setSettings] = useState(false);
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
     useEffect(() => {
         if (!user) {
             navigate('/login', { state: { successMsg: 'You have logged out!' } });
@@ -46,16 +50,14 @@ function Account() {
     const fetchUser = async () => {
         try {
             const data = await getUser();
-            debugger;
-            setUser(data);
             setFirstName(data.first_name || '');
             setLastName(data.last_name || '');
             setPhone(data.phone || '');
             setEmail(data.email || '');
             setHasPassword(data.has_password);
+            setPhotoUrl(data.photo || '');
         } catch (error) {
-            debugger;
-            console.error("Failed to fetch user", error);
+            setDisplayMsg('An error occurred while fetching user data!');
         }
     };
 
@@ -63,19 +65,21 @@ function Account() {
         e.preventDefault();
         setFormErrors({});
         try {
-            debugger;
-            await updateUserForm(firstName, lastName, phone);
-            if (settings && (oldPassword && newPassword)) {
-                await changePassword(oldPassword, newPassword);
+            await updateUserForm(firstName, lastName, phone, photo);
+            if (settings && (oldPassword && newPassword && newPasswordConfirm)) {
+                await changePassword(oldPassword, newPassword, newPasswordConfirm);
                 setSettings(false);
                 setOldPassword('');
                 setNewPassword('');
+                setNewPasswordConfirm('');
             }
+
+            const updatedUser = await getUser();
+            setUser(updatedUser);
             setDisplayMsg('Success! User info changed!');
 
         }
         catch (error) {
-            debugger;
             if (error.response && error.response.data) {
                 setFormErrors(error.response.data);
                 setDisplayMsg('Some of the information you entered is incorrect!');
@@ -102,6 +106,14 @@ function Account() {
                 <main className="page-content">
                     <h1>Account</h1>
                     <form className={"open-add-form"} onRefresh={fetchUser}>
+                        <div className="profile-img-container">
+                            <img
+                                src={photo ? URL.createObjectURL(photo) : (photoUrl || '/user_profile.png')}
+                                alt="Profile"
+                                className="profile-img"
+                            />
+                            <Input label="Profile Photo" type="file" accept=".png,.jpg,.jpeg,.svg" onChange={(e) => setPhoto(e.target.files[0])} error={formErrors.photo?.[0]} />
+                        </div>
                         <Input label="First Name" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="" error={formErrors.first_name?.[0]} />
                         <Input label="Last Name" type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="" error={formErrors.last_name?.[0]} />
                         <Input label="Email" type="text" value={email} disabled={true} placeholder="" error={formErrors.email?.[0]} />
@@ -112,6 +124,7 @@ function Account() {
                             <div className={"open-add-form"}>
                                 <Input label="Old Password" type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="" error={formErrors.old_password?.[0]} />
                                 <Input label="New Password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="" error={formErrors.new_password?.[0]} />
+                                <Input label="Confirm New Password" type="password" value={newPasswordConfirm} onChange={(e) => setNewPasswordConfirm(e.target.value)} placeholder="" error={formErrors.new_password_confirm?.[0]} />
                             </div>
                         )}
                         <Button text="Save Changes" onClick={updateUser} disabled={false} type="button" className="save-button" />

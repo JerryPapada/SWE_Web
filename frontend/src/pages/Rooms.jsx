@@ -11,6 +11,7 @@ import Input from '../components/Input.jsx';
 import { getCinemas } from '../services/cinemaServices.js';
 import { getRoomTypes, addRoomForm, getRooms } from '../services/roomServices.js';
 import RoomCard from '../components/RoomCard';
+import '../pages-css/Rooms.css';
 
 
 function Rooms() {
@@ -47,13 +48,11 @@ function Rooms() {
         setRoomForm(!roomForm);
     }
     const fetchCinemas = async () => {
-        debugger;
         try {
             const cinemasData = await getCinemas();
             setCinemasList(cinemasData.results);
             setCinemaOptions(cinemasData.results.map(cinema => ({ value: cinema.id, label: cinema.name })));
         } catch (error) {
-            debugger;
             setDisplayMsg("Failed to fetch cinemas!");
         }
     };
@@ -141,7 +140,7 @@ function Rooms() {
                             <div className="catalogue-grid">
                                 {roomsList.map((room) => (<RoomCard key={room.id} room={room} onRefresh={fetchRooms} onSetMsg={setDisplayMsg} roomTypesList={roomTypesList} />))}
                             </div>)
-                            : (<p style={{ color: 'white', textAlign: 'center', marginTop: '2rem' }}>No Rooms found.</p>)}
+                            : (<p className="empty-rooms-msg">No Rooms found.</p>)}
                     </div>
                 </main>
             </div>

@@ -15,13 +15,11 @@ export const addRoomForm = async (cinema, name, capacity, rows, seatsPerRow, roo
     formData.append('room_type', roomType);
     formData.append('photo', image);
     formData.append('is_active', isActive);
-    debugger;
     const response = await api.post('venues/rooms/', formData);
     return response.data;
 };
 
 export const getRooms = async () => {
-    debugger;
     const response = await api.get('venues/rooms/');
     return response.data;
 };

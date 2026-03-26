@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { deleteRoom, updateRoom } from '../services/roomServices.js';
 import Input from './Input';
 import { useAuth } from '../context/Authorisation';
+import '../pages-css/Rooms.css';
 
 function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
     const [showConfirm, setShowConfirm] = useState(false);
@@ -73,9 +74,9 @@ function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
                     <>
                         <h3>{room.cinema_name} - {room.name}</h3>
                         <p className="card-items">Capacity: {room.capacity} seats</p>
-                        <div>
+                        <div className="room-card-status">
                             <span>Type: {getRoomTypeLabel(room.room_type)}</span>
-                            <span style={{ color: room.is_active ? '#22c55e' : '#ef4444', marginLeft: '1rem' }}>
+                            <span className={room.is_active ? 'status-active' : 'status-inactive'}>
                                 Status: {room.is_active ? 'Active' : 'Inactive'}
                             </span>
                         </div>
@@ -83,21 +84,20 @@ function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
                 )}
             </div>
             <div className="card-actions">
-                {!isEditing && (
-                    !showConfirm ? (
-                        <>
-                            <button className={isAdmin ? "card-button edit" : "hide-card-button edit"} onClick={toggleEdit}>Edit</button>
-                            <button className={isAdmin ? "card-button delete" : "hide-card-button delete"} onClick={toggleConfirm}>Delete</button>
-                        </>
-                    ) : (
-                        <div className="confirm-delete-box">
-                            <p>Are you sure?</p>
-                            <div className="confirm-buttons">
-                                <button className="confirm-button yes" onClick={handleConfirmDelete}>Yes</button>
-                                <button className="confirm-button no" onClick={toggleConfirm}>No</button>
-                            </div>
+                {!isEditing && !showConfirm && (
+                    <>
+                        {isAdmin && <button className="card-button edit" onClick={toggleEdit}>Edit</button>}
+                        {isAdmin && <button className="card-button delete" onClick={toggleConfirm}>Delete</button>}
+                    </>
+                )}
+                {!isEditing && showConfirm && (
+                    <div className="confirm-delete-box">
+                        <p>Are you sure?</p>
+                        <div className="confirm-buttons">
+                            <button className="confirm-button yes" onClick={handleConfirmDelete}>Yes</button>
+                            <button className="confirm-button no" onClick={toggleConfirm}>No</button>
                         </div>
-                    )
+                    </div>
                 )}
             </div>
         </div>

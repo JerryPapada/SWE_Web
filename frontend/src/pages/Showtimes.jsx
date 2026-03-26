@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { getCinemas } from "../services/cinemaServices";
 import { addShowtime, getShowtimes } from "../services/showtimeServices";
 import ShowtimeCard from "../components/ShowtimeCard";
+import "../pages-css/Showtimes.css";
 
 function Showtimes() {
 
@@ -59,9 +60,7 @@ function Showtimes() {
 
     const fetchRooms = async () => {
         try {
-            debugger;
             const data = await getRooms();
-            debugger;
             setRoomOptions(data.results);
         } catch (error) {
             setDisplayMsg("Failed to fetch rooms!");
@@ -87,7 +86,6 @@ function Showtimes() {
 
     const handleAddShowtime = async () => {
         try {
-            debugger;
             const data = await addShowtime(movie, room, date, price, isActive, availableSeats);
             setDisplayMsg('Success! A showtime has been added!');
             setShowtimeForm(false);
@@ -143,9 +141,13 @@ function Showtimes() {
                     <div className={showtimeForm ? "catalogue-hidden" : "catalogue-visible"}>
                         {showtimesList.length > 0 ? (
                             <div className="catalogue-grid">
-                                {showtimesList.map((showtime) => (<ShowtimeCard key={showtime.id} showtime={showtime} onRefresh={fetchShowtimes} onSetMsg={setDisplayMsg} />))}
+                                {showtimesList.map((showtime) => {
+                                    const matchingRoom = roomOptions.find((r) => r.id === showtime.room);
+                                    const showtimeWithCapacity = { ...showtime, room_capacity: matchingRoom ? matchingRoom.capacity : "N/A" };
+                                    return <ShowtimeCard key={showtime.id} showtime={showtimeWithCapacity} onRefresh={fetchShowtimes} onSetMsg={setDisplayMsg} />;
+                                })}
                             </div>)
-                            : (<p style={{ color: 'white', textAlign: 'center', marginTop: '2rem' }}>No showtimes found.</p>)}
+                            : (<p className="no-showtimes-message">No showtimes found.</p>)}
                     </div>
                 </main>
             </div>

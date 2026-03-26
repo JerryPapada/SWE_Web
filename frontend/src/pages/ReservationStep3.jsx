@@ -36,9 +36,7 @@ function ReservationStep3() {
 
     const handleConfirmReservation = async () => {
         try {
-            debugger;
             const reservationResponse = await setReservation(selectedShowTime.id, seatsArray.length, seatsArray, sendEmail);
-            debugger;
             navigate('/reservations-step-4', { state: { ...location.state, reservationResponse, successMsg: "Success! Your reservation has been confirmed!" } });
         } catch (error) {
             setDisplayMsg("There was a problem with the reservation. Please try again.")

@@ -48,7 +48,6 @@ function Users() {
     const fetchUsers = async () => {
         try {
             const usersData = await getUsers();
-            debugger;
             setUsersList(usersData.results);
         } catch (error) {
             if (error.response.status === 401) {

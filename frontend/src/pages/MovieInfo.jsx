@@ -28,9 +28,7 @@ function MovieInfo() {
 
     const fetchMovie = async () => {
         try {
-            debugger;
             const movieData = await getMovie(movieId);
-            debugger;
             setMovie(movieData);
         } catch (error) {
             setDisplayMsg("Failed to fetch movie!");

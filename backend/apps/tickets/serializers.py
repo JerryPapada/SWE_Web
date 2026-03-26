@@ -6,16 +6,23 @@ from .models import Ticket, VisitorLog
 class TicketSerializer(serializers.ModelSerializer):
     reservation_id = serializers.UUIDField(source='reservation.id', read_only=True)
     user_email = serializers.EmailField(source='reservation.user.email', read_only=True)
+    user_full_name = serializers.SerializerMethodField(read_only=True)
     movie_title = serializers.CharField(source='reservation.showtime.movie.title', read_only=True)
     cinema_name = serializers.CharField(source='reservation.showtime.room.cinema.name', read_only=True)
     room_name = serializers.CharField(source='reservation.showtime.room.name', read_only=True)
     showtime = serializers.DateTimeField(source='reservation.showtime.start_time', read_only=True)
     seat_number = serializers.CharField(read_only=True)
 
+    def get_user_full_name(self, obj):
+        user = obj.reservation.user
+        if user:
+            return f"{user.first_name} {user.last_name}"
+        return ""
+
     class Meta:
         model = Ticket
         fields = [
-            'id', 'reservation_id', 'user_email',
+            'id', 'reservation_id', 'user_email', 'user_full_name',
             'movie_title', 'cinema_name', 'room_name',
             'showtime', 'seat_number',
             'qr_code', 'qr_data', 'status',

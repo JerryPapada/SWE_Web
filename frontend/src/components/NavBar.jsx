@@ -1,12 +1,14 @@
 import { NavLink } from "react-router-dom";
 import Button from "./Button";
 import { useState } from "react";
+import { useAuth } from '../context/Authorisation';
 function NavBar() {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const toggleNav = async (e) => {
         setIsOpen(!isOpen);
     }
-
+    const showPage = user?.role === "USER";
     return (
         <>
 
@@ -14,14 +16,14 @@ function NavBar() {
                 <ul>
                     <li><NavLink to="/home">Home</NavLink></li>
                     <li><NavLink to="/reservations-step-1">Reservations</NavLink></li>
-                    <li><NavLink to="/">Tickets</NavLink></li>
-                    <li><NavLink to="/users">Users</NavLink></li>
+                    <li className={showPage ? "hidden" : ""}><NavLink to="/check-in">Check-In</NavLink></li>
+                    <li className={showPage ? "hidden" : ""}><NavLink to="/users">Users</NavLink></li>
                     <li><NavLink to="/cinemas">Cinemas</NavLink></li>
                     <li><NavLink to="/rooms">Rooms</NavLink></li>
-                    <li><NavLink to="/movies">Movies</NavLink></li>
-                    <li><NavLink to="/showtimes">Showtimes</NavLink></li>
+                    <li className={showPage ? "hidden" : ""}><NavLink to="/movies">Movies</NavLink></li>
+                    <li className={showPage ? "hidden" : ""}><NavLink to="/showtimes">Showtimes</NavLink></li>
                 </ul>
-                <ul style={{ marginTop: "4rem", marginBottom: "2rem" }}>
+                <ul className="nav-bottom-list">
                     <li><NavLink to="/account">My Account</NavLink></li>
                 </ul>
             </nav>

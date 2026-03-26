@@ -13,6 +13,7 @@ import ReservationStep1 from '../pages/ReservationStep1';
 import ReservationStep2 from '../pages/ReservationStep2';
 import ReservationStep3 from '../pages/ReservationStep3';
 import ReservationStep4 from '../pages/ReservationStep4';
+import CheckIn from '../pages/CheckIn';
 
 function AppRoutes() {
     return (
@@ -32,6 +33,7 @@ function AppRoutes() {
             <Route path="/reservations-step-2" element={<ReservationStep2 />} />
             <Route path="/reservations-step-3" element={<ReservationStep3 />} />
             <Route path="/reservations-step-4" element={<ReservationStep4 />} />
+            <Route path="/check-in" element={<CheckIn />} />
         </Routes>
     )
 }

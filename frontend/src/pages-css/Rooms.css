@@ -1,0 +1,21 @@
+.room-card-status {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.status-active {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.empty-rooms-msg {
+    color: white;
+    text-align: center;
+    margin-top: 2rem;
+}

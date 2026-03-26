@@ -66,7 +66,6 @@ function Cinemas() {
             fetchCinemas();
         }
         catch (error) {
-            debugger;
             if (error.response.status === 403) {
                 setDisplayMsg('You do not have permission to perform this action!');
             } else if (error.response.status === 401) {
@@ -84,7 +83,7 @@ function Cinemas() {
             const actualList = data.results ? data.results : data;
             setCinemasList(actualList);
         } catch (error) {
-            console.error("Failed to fetch cinemas", error);
+            setDisplayMsg('An error occurred while fetching cinemas!');
         }
     };
 

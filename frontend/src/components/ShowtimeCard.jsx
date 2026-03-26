@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { deleteShowtime, updateShowtime } from '../services/showtimeServices.js';
 import Input from './Input';
 import { useAuth } from '../context/Authorisation';
+import Button from './Button';
+import ShowtimeReservationsModal from './ShowtimeReservationWindow.jsx';
 import '../pages-css/ReservationStep.css';
-
+import '../pages-css/Showtimes.css';
 function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
     const [showConfirm, setShowConfirm] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const [showReservations, setShowReservations] = useState(false);
 
     const formatForInput = (dateString) => {
         if (!dateString) return "";
@@ -22,7 +25,7 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
 
     const { user } = useAuth();
     const isAdmin = user?.role === 'ADMIN';
-
+    const isAdminOrTicketManager = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
     const toggleConfirm = () => setShowConfirm(!showConfirm);
 
     const toggleEdit = () => {
@@ -70,23 +73,26 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
             <div className="card-info">
                 {isEditing ? (
                     <div className="edit-form-inline">
-                        <h3 style={{ marginBottom: "0.5rem" }}>Editing: {showtime.movie_title}</h3>
-                        <p className="card-items" style={{ marginBottom: "1rem" }}>{showtime.cinema_name} - {showtime.room_name}</p>
+                        <h3 className="edit-heading">Editing: {showtime.movie_title}</h3>
+                        <p className="card-items edit-subheading">{showtime.cinema_name} - {showtime.room_name}</p>
                         <Input label="Date and Time" type="datetime-local" value={editDate} onChange={(e) => setEditDate(e.target.value)} />
                         <Input label="Price" type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
                         <Input label="Is Active" type="checkbox" value={editActive} onChange={(e) => setEditActive(e.target.checked)} />
                         <div className="edit-actions-inline">
-                            <button className="confirm-button yes" onClick={handleUpdate}>Save</button>
-                            <button className="confirm-button no" onClick={toggleEdit}>Cancel</button>
+                            <Button className="confirm-button yes" onClick={handleUpdate} text="Save" type="button" />
+                            <Button className="confirm-button no" onClick={toggleEdit} text="Cancel" type="button" />
                         </div>
                     </div>
                 ) : (
                     <>
                         <h3>{showtime.movie_title}</h3>
-                        <p className="card-items" style={{ marginBottom: "0.5rem" }}>{showtime.cinema_name} - {showtime.room_name}</p>
-                        <p className="card-items" style={{ marginBottom: "0.5rem" }}>Date: {new Date(showtime.start_time).toLocaleString()}</p>
-                        <p className="card-items" style={{ marginBottom: "0.5rem" }}>Price: € {showtime.price}</p>
-                        <p className="card-items" style={{ marginBottom: "0.5rem" }}>Available Seats: {showtime.available_seats}</p>
+                        <div className="card-details">
+                            <p>{showtime.cinema_name} - {showtime.room_name}</p>
+                            <p>Date: {new Date(showtime.start_time).toLocaleString()}</p>
+                            <p>Price: € {showtime.price}</p>
+                            <p>Room Capacity: {showtime.room_capacity}</p>
+                            <p>Available Seats: {showtime.available_seats}</p>
+                        </div>
 
                         <div className="showtime-badges">
                             {!showtime.is_3d && !showtime.is_imax && !showtime.is_dolby_atmos && <span className="badge badge-2d">2D</span>}
@@ -96,29 +102,43 @@ function ShowtimeCard({ showtime, onRefresh, onSetMsg }) {
                         </div>
 
                         <div>
-                            <span style={{ color: showtime.is_active ? '#22c55e' : '#ef4444' }}>
+                            <span className={showtime.is_active ? 'status-active' : 'status-inactive'}>
                                 Status: {showtime.is_active ? 'Active' : 'Inactive'}
                             </span>
+
                         </div>
                     </>
                 )}
             </div>
             <div className="card-actions">
-                {!isEditing && (
-                    !showConfirm ? (
-                        <>
-                            <button className={isAdmin ? "card-button edit" : "hide-card-button edit"} onClick={toggleEdit}>Edit</button>
-                            <button className={isAdmin ? "card-button delete" : "hide-card-button delete"} onClick={toggleConfirm}>Delete</button>
-                        </>
-                    ) : (<div className="confirm-delete-box">
+                {!isEditing && !showConfirm && (
+                    <>
+                        {isAdminOrTicketManager && (
+                            <Button className="card-button info" onClick={() => setShowReservations(true)} text="Reservations" type="button" />
+                        )}
+                        {isAdmin && (
+                            <>
+                                <Button className="card-button edit" onClick={toggleEdit} text="Edit" type="button" />
+                                <Button className="card-button delete" onClick={toggleConfirm} text="Delete" type="button" />
+                            </>
+                        )}
+                    </>
+                )}
+
+                {!isEditing && showConfirm && (
+                    <div className="confirm-delete-box">
                         <p>Are you sure?</p>
                         <div className="confirm-buttons">
-                            <button className="confirm-button yes" onClick={handleConfirmDelete}>Yes</button>
-                            <button className="confirm-button no" onClick={toggleConfirm}>No</button>
+                            <Button className="confirm-button yes" onClick={handleConfirmDelete} text="Yes" type="button" />
+                            <Button className="confirm-button no" onClick={toggleConfirm} text="No" type="button" />
                         </div>
-                    </div>)
+                    </div>
                 )}
             </div>
+
+            {showReservations && (
+                <ShowtimeReservationsModal showtimeId={showtime.id} movieTitle={showtime.movie_title} roomName={`${showtime.cinema_name} - ${showtime.room_name}`} onClose={() => setShowReservations(false)} />
+            )}
         </div>
     );
 }

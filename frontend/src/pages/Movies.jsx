@@ -44,11 +44,9 @@ function Movies() {
     }
 
     const handleAddMovie = async (e) => {
-        debugger;
         e.preventDefault();
         setFormErrors({});
         try {
-            debugger;
             await addMovieForm(title, description, duration, genre, rating, director, poster, isActive, trailer);
             setMovieForm(false);
             setDisplayMsg('Success! A movie has been added!');
@@ -75,7 +73,6 @@ function Movies() {
     };
     const fetchMovies = async () => {
         try {
-            debugger;
             const moviesData = await getMovies();
             setMoviesList(moviesData.results);
         } catch (error) {

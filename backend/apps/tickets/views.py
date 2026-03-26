@@ -28,7 +28,7 @@ class TicketViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['reservation__user__email', 'reservation__showtime__movie__title']
     ordering_fields = ['created_at', 'reservation__showtime__start_time']
-    filterset_fields = ['status', 'checked_in']
+    filterset_fields = ['status', 'checked_in', 'reservation__showtime']
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -203,6 +203,9 @@ class VisitorSearchView(APIView):
         reservation = reservations.first()
         name = reservation.user.first_name if reservation.user else "Visitor"
 
+        tickets = Ticket.objects.filter(reservation__in=reservations)
+        tickets_data = TicketSerializer(tickets, many=True).data
+
         return Response({
             'found': True,
             'welcome_message': f"Καλως ηρθατε, {name}!",
@@ -215,4 +218,5 @@ class VisitorSearchView(APIView):
                 'seats': reservation.seat_numbers,
                 'start_time': reservation.showtime.start_time,
             },
+            'tickets': tickets_data,
         })

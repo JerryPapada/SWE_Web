@@ -4,7 +4,7 @@ import Header from "../components/Header";
 import NavBar from "../components/NavBar";
 import TicketCard from "../components/TicketCard";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import '../pages-css/ReservationStep.css';
 
 
@@ -26,6 +26,14 @@ function ReservationStep4() {
 
     const tickets = reservationResponse?.tickets || [];
 
+    useEffect(() => {
+        if (!user) {
+            navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else if (!reservationResponse) {
+            navigate('/reservations-step-1');
+        }
+    }, [user, navigate, reservationResponse]);
+
     return (
         <>
             <Header page="reservations-step-4" msg={displayMsg} />
@@ -36,13 +44,13 @@ function ReservationStep4() {
                         <h1>Reservation Step 4</h1>
                         <h2 className="step-instructions">Your Tickets</h2>
                         <div className="ticket-list-container">
-                        {Array.isArray(tickets) ? (
-                            tickets.map((ticket) => (
-                                <TicketCard key={ticket.id} ticket={ticket} />
-                            ))
-                        ) : (
-                            <TicketCard ticket={tickets} />
-                        )}
+                            {Array.isArray(tickets) ? (
+                                tickets.map((ticket) => (
+                                    <TicketCard key={ticket.id} ticket={ticket} />
+                                ))
+                            ) : (
+                                <TicketCard ticket={tickets} />
+                            )}
                         </div>
                     </div>
                 </main>

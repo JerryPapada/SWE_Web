@@ -22,7 +22,6 @@ function ReservationStep2() {
 
     const getRoomSeats = async () => {
         try {
-            debugger;
             const response = await getRoom(selectedShowTime.room_name, selectedShowTime.cinema_name);
             const roomData = Array.isArray(response.data) ? response.data : (response.data?.results || []);
             if (roomData.length > 1) {
@@ -46,7 +45,6 @@ function ReservationStep2() {
     }
     const getUnavailableSeats = async () => {
         try {
-            debugger;
             const response = await getReservationsSeats(selectedShowTime.id);
             const allSeatsData = Array.isArray(response) ? response : (response?.results || []);
             const reservedSeats = allSeatsData.filter(seat => seat.is_reserved).map(seat => seat.seat_number);
@@ -75,7 +73,6 @@ function ReservationStep2() {
     }, [user, selectedShowTime]);
 
     const nextStep = () => {
-        //TODO NA TSEKARO AN OI THESEIS INE PIASMENES IDI
         navigate('/reservations-step-3', { state: { selectedShowTime, selectedMovie, cinema, room, selectedSeats } });
     }
 

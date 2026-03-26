@@ -2,7 +2,6 @@ import api from '../api/axios';
 
 export const setReservation = async (showtimeId, numberOfTickets, seats, sendEmail = false) => {
     try {
-        debugger;
         const response = await api.post('reservations/', {
             showtime: showtimeId,
             num_seats: numberOfTickets,
@@ -18,7 +17,6 @@ export const setReservation = async (showtimeId, numberOfTickets, seats, sendEma
 export const getReservationsSeats = async (showtimeId) => {
     try {
         const response = await api.get(`venues/showtimes/${showtimeId}/seats/`);
-        debugger;
         return response.data;
     } catch (error) {
         throw error;

@@ -5,11 +5,19 @@ export const getUser = async () => {
     return response.data;
 };
 
-export const updateUserForm = async (firstName, lastName, phone) => {
-    const response = await api.patch('users/profile/', {
-        first_name: firstName,
-        last_name: lastName,
-        phone: phone
+export const updateUserForm = async (firstName, lastName, phone, photoFile) => {
+    const formData = new FormData();
+    formData.append('first_name', firstName);
+    formData.append('last_name', lastName);
+    formData.append('phone', phone);
+    if (photoFile) {
+        formData.append('photo', photoFile);
+    }
+
+    const response = await api.patch('users/profile/', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
     });
     return response.data;
 };
@@ -29,7 +37,6 @@ export const addUserForm = async (firstName, lastName, email, password, confirmP
 };
 
 export const getUsers = async () => {
-    debugger;
     const response = await api.get('users/manage/');
     return response.data;
 };

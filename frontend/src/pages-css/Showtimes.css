@@ -1,0 +1,114 @@
+.no-showtimes-message {
+    color: white;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.edit-heading {
+    margin-bottom: 0.5rem;
+}
+
+.edit-subheading {
+    margin-bottom: 1rem;
+}
+
+.card-item-margin {
+    margin-bottom: 0.5rem;
+}
+
+.status-active {
+    color: #22c55e;
+}
+
+.status-inactive {
+    color: #ef4444;
+}
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #1b2929;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid rgba(141, 52, 52, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: white;
+}
+
+.modal-subtitle {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.occupancy-stats {
+    background: rgba(126, 64, 111, 0.15);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(126, 64, 111, 0.4);
+}
+
+.tickets-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+.tickets-table th,
+.tickets-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tickets-table th {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.modal-title {
+    color: #6caeaf;
+}
+
+.stats-highlight {
+    color: #faf55b;
+}
+
+.modal-error {
+    color: #ef4444;
+}
+
+.modal-text-white {
+    color: white;
+}
+
+.card-details p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}

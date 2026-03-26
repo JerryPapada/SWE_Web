@@ -50,9 +50,7 @@ export const AuthProvider = ({ children }) => {
 
 
     const login = async (email, password) => {
-        debugger;
         const response = await api.post('auth/login/', { email, password });
-
         const token = response.data.access || response.data.token || response.data.key;
         sessionStorage.setItem('token', token);
 
