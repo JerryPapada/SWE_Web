@@ -76,6 +76,7 @@ class AdminUserManagementViewSet(ModelViewSet):
     search_fields = ['email', 'first_name', 'last_name', 'phone']
     ordering_fields = ['created_at', 'email', 'last_name']
 
+    @extend_schema(summary="Assign or update user roles", responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT})
     @action(detail=True, methods=['post'])
     def assign_role(self, request, pk=None):
         user = self.get_object()
@@ -113,6 +114,7 @@ class AdminUserManagementViewSet(ModelViewSet):
         return Response({'message': f'Role {role} assigned to {user.email}', 'roles': user.roles},
                         status=status.HTTP_200_OK)
 
+    @extend_schema(summary="Deactivate a user account", responses={200: OpenApiTypes.OBJECT})
     @action(detail=True, methods=['post'])
     def deactivate(self, request, pk=None):
         user = self.get_object()
@@ -120,6 +122,7 @@ class AdminUserManagementViewSet(ModelViewSet):
         user.save()
         return Response({'message': f'User {user.email} deactivated.'}, status=status.HTTP_200_OK)
 
+    @extend_schema(summary="Activate a user account", responses={200: OpenApiTypes.OBJECT})
     @action(detail=True, methods=['post'])
     def activate(self, request, pk=None):
         user = self.get_object()
@@ -128,7 +131,9 @@ class AdminUserManagementViewSet(ModelViewSet):
         return Response({'message': f'User {user.email} activated.'}, status=status.HTTP_200_OK)
 
 class UserRolesView(APIView):
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(summary="List available user roles", responses={200: OpenApiTypes.OBJECT})
     def get(self, request):
         roles = [{'value': key, 'label': label} for key, label in User.Role.choices]
-        return Response(roles)  
+        return Response(roles)
