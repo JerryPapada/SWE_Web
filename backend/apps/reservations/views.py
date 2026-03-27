@@ -62,6 +62,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        summary="Get current user's reservations",
+        description="Returns a filtered list of reservations for the authenticated user.",
+        responses={200: MyReservationsSerializer(many=True)}
+    )
     @action(detail=False, methods=['get'])
     def my_reservations(self, request):
         reservations = self.get_queryset().filter(user=request.user)
@@ -79,6 +84,11 @@ class ReservationViewSet(viewsets.ModelViewSet):
         serializer = MyReservationsSerializer(reservations, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        summary="Cancel a reservation",
+        description="Cancels a pending or confirmed reservation if the showtime has not started yet.",
+        responses={200: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT}
+    )
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
         reservation = self.get_object()
@@ -104,6 +114,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation.cancel(changed_by=request.user, notes='Cancelled from API')
         return Response({'message': 'Reservation cancelled successfully.'})
 
+    @extend_schema(summary="Get reservation history", responses={200: ReservationHistorySerializer(many=True)})
     @action(detail=True, methods=['get'])
     def history(self, request, pk=None):
         reservation = self.get_object()
@@ -111,6 +122,7 @@ class ReservationViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(history, many=True)
         return Response(serializer.data)
 
+    @extend_schema(summary="Get aggregate reservation statistics", responses={200: OpenApiTypes.OBJECT})
     @action(detail=False, methods=['get'], url_path='admin/statistics')
     def statistics(self, request):
         now = timezone.now()

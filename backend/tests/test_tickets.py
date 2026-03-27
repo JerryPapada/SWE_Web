@@ -64,3 +64,42 @@ class TicketTests(BaseAPITestCase):
         data = {'qr_data': self.ticket.qr_data}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_tickets(self):
+        url = reverse('ticket-user-tickets', kwargs={'user_id': self.regular_user.id})
+        self.authenticate(self.regular_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_user_tickets_by_day(self):
+        day = self.showtime.start_time.date().isoformat()
+        url = reverse('ticket-user-tickets-by-day', kwargs={'user_id': self.regular_user.id, 'day': day})
+        self.authenticate(self.regular_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_user_tickets_by_day_no_tickets(self):
+        day = (self.showtime.start_time + timedelta(days=1)).date().isoformat()
+        url = reverse('ticket-user-tickets-by-day', kwargs={'user_id': self.regular_user.id, 'day': day})
+        self.authenticate(self.regular_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_user_tickets_other_user_as_regular(self):
+        # Regular user trying to see other user's tickets should get empty list or filtered list
+        # Based on get_queryset, they only see their own.
+        url = reverse('ticket-user-tickets', kwargs={'user_id': self.manager_user.id})
+        self.authenticate(self.regular_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    def test_user_tickets_other_user_as_manager(self):
+        url = reverse('ticket-user-tickets', kwargs={'user_id': self.regular_user.id})
+        self.authenticate(self.manager_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)

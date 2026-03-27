@@ -41,6 +41,7 @@ class CinemaViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
+    @extend_schema(summary="List rooms in a cinema", responses={200: RoomSerializer(many=True)})
     @action(detail=True, methods=['get'])
     def rooms(self, request, pk=None):
         cinema = self.get_object()
@@ -48,6 +49,7 @@ class CinemaViewSet(viewsets.ModelViewSet):
         serializer = RoomSerializer(rooms, many=True)
         return Response(serializer.data)
 
+    @extend_schema(summary="List upcoming showtimes in a cinema", responses={200: ShowtimeCalendarSerializer(many=True)})
     @action(detail=True, methods=['get'])
     def showtimes(self, request, pk=None):
         cinema = self.get_object()
@@ -80,6 +82,7 @@ class RoomViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsTicketManager()]
 
+    @extend_schema(summary="List available room types", responses={200: OpenApiTypes.OBJECT})
     @action(detail=False, methods=['get'], url_path='room-types')
     def room_types(self, request):
         choices = [{'value': k, 'label': str(v)} for k, v in Room.RoomType.choices]
@@ -109,16 +112,19 @@ class MovieViewSet(viewsets.ModelViewSet):
                 return Movie.objects.filter(is_active=True)
         return Movie.objects.all()
 
+    @extend_schema(summary="List movie rating options", responses={200: OpenApiTypes.OBJECT})
     @action(detail=False, methods=['get'], url_path='rating-options')
     def rating_options(self, request):
         choices = [{'value': k, 'label': str(v)} for k, v in Movie.Rating.choices]
         return Response({'results': choices})
 
+    @extend_schema(summary="List movie genre options", responses={200: OpenApiTypes.OBJECT})
     @action(detail=False, methods=['get'], url_path='genre-options')
     def genre_options(self, request):
         choices = [{'value': k, 'label': str(v)} for k, v in Movie.Genre.choices]
         return Response({'results': choices})
 
+    @extend_schema(summary="List upcoming showtimes for a movie", responses={200: ShowtimeCalendarSerializer(many=True)})
     @action(detail=True, methods=['get'])
     def showtimes(self, request, pk=None):
         movie = self.get_object()
@@ -158,6 +164,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(start_time__date__lte=date_to)
         return queryset.order_by('start_time', 'movie__title', 'room__name')
 
+    @extend_schema(summary="List seats for a showtime", responses={200: ShowtimeSeatSerializer(many=True)})
     @action(detail=True, methods=['get'])
     def seats(self, request, pk=None):
         showtime = self.get_object()
@@ -270,12 +277,14 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
                 reservation.cancel(changed_by=request.user, notes='Showtime removed by manager')
         return super().destroy(request, *args, **kwargs)
 
+    @extend_schema(summary="Get showtime calendar", responses={200: ShowtimeCalendarSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def calendar(self, request):
         showtimes = self.get_queryset().filter(is_active=True, start_time__gte=timezone.now())
         serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
+    @extend_schema(summary="Get today's showtimes", responses={200: ShowtimeCalendarSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def today(self, request):
         now = timezone.now()
@@ -285,6 +294,7 @@ class ShowtimeViewSet(viewsets.ModelViewSet):
         serializer = ShowtimeCalendarSerializer(showtimes, many=True)
         return Response(serializer.data)
 
+    @extend_schema(summary="Get upcoming showtimes (next 7 days)", responses={200: ShowtimeCalendarSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def upcoming(self, request):
         now = timezone.now()

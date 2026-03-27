@@ -36,11 +36,37 @@ class TicketViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(reservation__user=self.request.user)
         return queryset
 
+    @extend_schema(summary="Get current user's valid tickets", responses={200: TicketSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def my_tickets(self, request):
         tickets = self.get_queryset().filter(
             reservation__user=request.user,
             status=Ticket.Status.VALID
+        )
+        serializer = self.get_serializer(tickets, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Get all tickets for a user",
+        description="Returns all tickets associated with a specific user ID. Managers can see any user's tickets, regular users only their own.",
+        responses={200: TicketSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)')
+    def user_tickets(self, request, user_id=None):
+        tickets = self.get_queryset().filter(reservation__user_id=user_id)
+        serializer = self.get_serializer(tickets, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Get user tickets for a specific day",
+        description="Returns all tickets for a user on a given date (YYYY-MM-DD).",
+        responses={200: TicketSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'], url_path='user/(?P<user_id>[^/.]+)/(?P<day>[^/.]+)')
+    def user_tickets_by_day(self, request, user_id=None, day=None):
+        tickets = self.get_queryset().filter(
+            reservation__user_id=user_id,
+            reservation__showtime__start_time__date=day
         )
         serializer = self.get_serializer(tickets, many=True)
         return Response(serializer.data)
@@ -129,6 +155,7 @@ class VisitorLogViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(logged_by=self.request.user)
 
+    @extend_schema(summary="List visitor logs by showtime", responses={200: VisitorLogSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def by_showtime(self, request):
         showtime_id = request.query_params.get('showtime_id')
@@ -139,6 +166,7 @@ class VisitorLogViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(visitors, many=True)
         return Response(serializer.data)
 
+    @extend_schema(summary="List today's visitor logs", responses={200: VisitorLogSerializer(many=True)})
     @action(detail=False, methods=['get'])
     def today(self, request):
         from django.utils import timezone
