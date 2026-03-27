@@ -58,7 +58,7 @@ function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
         <div className="card">
             <div className="card-image">
                 <img src={room.photo || '/logo.svg'} alt={room.name} />
-                {!room.is_active && <span className="inactive-badge">Inactive</span>}
+                {isAdmin && !room.is_active && <span className="inactive-badge">Inactive</span>}
             </div>
             <div className="card-info">
                 {isEditing ? (
@@ -76,9 +76,11 @@ function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
                         <p className="card-items">Capacity: {room.capacity} seats</p>
                         <div className="room-card-status">
                             <span>Type: {getRoomTypeLabel(room.room_type)}</span>
-                            <span className={room.is_active ? 'status-active' : 'status-inactive'}>
-                                Status: {room.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                            {isAdmin && (
+                                <span className={room.is_active ? 'status-active' : 'status-inactive'}>
+                                    Status: {room.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            )}
                         </div>
                     </>
                 )}

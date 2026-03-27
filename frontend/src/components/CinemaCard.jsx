@@ -8,7 +8,7 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
     const [editName, setEditName] = useState(cinema.name);
     const [editActive, setEditActive] = useState(cinema.is_active);
     const { user } = useAuth();
-    const rolePermission = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
+    const rolePermission = user?.role === 'ADMIN';
 
     const Confirm = () => setShowConfirm(!showConfirm);
     const toggleEdit = () => {

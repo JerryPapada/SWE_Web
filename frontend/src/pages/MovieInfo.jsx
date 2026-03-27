@@ -42,12 +42,8 @@ function MovieInfo() {
     };
 
     useEffect(() => {
-        if (!user) {
-            navigate('/login', { state: { successMsg: 'You have logged out!' } });
-        } else {
-            fetchMovie();
-        }
-    }, [movieId, user]);
+        fetchMovie();
+    }, [movieId]);
 
     return (
         <>

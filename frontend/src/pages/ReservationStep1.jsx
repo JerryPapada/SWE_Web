@@ -71,12 +71,8 @@ function ReservationStep1() {
     };
 
     useEffect(() => {
-        if (!user) {
-            navigate('/login', { state: { successMsg: 'You have logged out!' } });
-        } else {
-            fetchMovies();
-        }
-    }, [user]);
+        fetchMovies();
+    }, []);
 
     useEffect(() => {
         if (openCinemaList && cinemaSelectRef.current) {
@@ -114,7 +110,12 @@ function ReservationStep1() {
     }
 
     const nextStep = () => {
-        navigate('/reservations-step-2', { state: { selectedShowTime, selectedMovie, cinema } });
+        debugger;
+        if (user?.role === undefined || user?.role === null) {
+            setDisplayMsg('You must be logged in to make a reservation!');
+        } else {
+            navigate('/reservations-step-2', { state: { selectedShowTime, selectedMovie, cinema } });
+        }
     }
 
     return (

@@ -56,13 +56,9 @@ function Home() {
 
 
     useEffect(() => {
-        if (!user) {
-            navigate('/login', { state: { successMsg: 'You have logged out!' } });
-        } else {
-            fetchMovies();
-            fetchRatingOptions();
-        }
-    }, [user, navigate]);
+        fetchMovies();
+        fetchRatingOptions();
+    }, []);
 
     return (
         <>

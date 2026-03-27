@@ -18,7 +18,7 @@ function Users() {
     const navigate = useNavigate();
     const [userForm, setUserForm] = useState(false);
     const [formErrors, setFormErrors] = useState({});
-    const rolePermission = user?.role === 'ADMIN' || user?.role === 'TICKET_MANAGER';
+    const rolePermission = user?.role === 'ADMIN';
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -72,11 +72,13 @@ function Users() {
 
         if (!user) {
             navigate('/login', { state: { successMsg: 'You have logged out!' } });
+        } else if (!rolePermission) {
+            navigate('/home', { state: { successMsg: 'You do not have permission to access this page!' } });
         } else {
             fetchRoles();
             fetchUsers();
         }
-    }, [user, navigate]);
+    }, [user, navigate, rolePermission]);
 
     const handleAddUser = async (e) => {
         e.preventDefault();

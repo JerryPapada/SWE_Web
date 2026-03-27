@@ -1,7 +1,8 @@
 import { useAuth } from "../context/Authorisation";
 import Button from "../components/Button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 function Header({ page, msg }) {
+    const navigate = useNavigate();
     const { user, logout, changePassword } = useAuth();
 
 
@@ -14,11 +15,17 @@ function Header({ page, msg }) {
                 </Link>
                 {page != "login" && page != "register" && (
                     <div className="header-container">
-
-                        <div className="header-buttons">
-                            <p>Hello, {user?.first_name}</p>
-                            <Button text="Logout" onClick={logout} disabled={false} type="submit" className="button" />
-                        </div>
+                        {user ? (
+                            <div className="header-buttons">
+                                <p>Hello, {user.first_name}</p>
+                                <Button text="Logout" onClick={() => logout(navigate)} disabled={false} type="submit" className="button" />
+                            </div>
+                        ) : (
+                            <div className="header-buttons">
+                                <Link to="/login"><Button text="Login" disabled={false} type="submit" className="button" /></Link>
+                                <Link to="/register"><Button text="Register" disabled={false} type="submit" className="button" /></Link>
+                            </div>
+                        )}
                     </div>
                 )}
 

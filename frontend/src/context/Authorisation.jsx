@@ -43,9 +43,18 @@ export const AuthProvider = ({ children }) => {
         return userResponse.data;
     };
 
-    const logout = () => {
+    const logout = async (navigate) => {
+        const token = sessionStorage.getItem('token');
+        try {
+            await api.post('auth/logout/', {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
         sessionStorage.removeItem('token');
         setUser(null);
+        navigate('/login');
     };
 
 

@@ -38,12 +38,8 @@ function Cinemas() {
     const [displayMsg, setDisplayMsg] = useTimedMessage(successMessage);
 
     useEffect(() => {
-        if (!user) {
-            navigate('/login', { state: { successMsg: 'You have logged out!' } });
-        } else {
-            fetchCinemas();
-        }
-    }, [user, navigate]);
+        fetchCinemas();
+    }, []);
 
     const handleCinemaForm = () => {
         setCinemaForm(!cinemaForm);

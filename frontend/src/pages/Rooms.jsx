@@ -106,14 +106,10 @@ function Rooms() {
         }
     };
     useEffect(() => {
-        if (!user) {
-            navigate('/login', { state: { successMsg: 'You have logged out!' } });
-        } else {
-            fetchCinemas();
-            fetchRoomTypes();
-            fetchRooms();
-        }
-    }, [user, navigate]);
+        fetchCinemas();
+        fetchRoomTypes();
+        fetchRooms();
+    }, []);
 
     return (
         <>
