@@ -51,12 +51,22 @@ function CheckIn() {
 
     const handleCheckInByQR = async (qrData) => {
         try {
-            const response = await checkInByQR(qrData);
-            setDisplayMsg("Success! Check-in completed!");
+            await checkInByQR(qrData);
+            setDisplayMsg("Success! Enjoy the movie!");
             setShowScanner(false);
         } catch (error) {
             setShowScanner(false);
-            setDisplayMsg("Error! Check-in failed!");
+            const backendError = error.response?.data?.error || "";
+            const friendlyMessages = {
+                "today": "This ticket is booked for a different date!",
+                "already used": "This ticket has already been checked in!",
+                "EXPIRED": "The showtime for this ticket has expired!",
+                "CANCELLED": "This ticket has been cancelled!",
+                "not found": "Unrecognized QR Code!"
+            };
+            const matchedKey = Object.keys(friendlyMessages).find(key => backendError.includes(key));
+            const messageToShow = matchedKey ? friendlyMessages[matchedKey] : "An unknown error occurred during scan!";
+            setDisplayMsg(` ${messageToShow}`);
         }
     }
 
@@ -67,7 +77,7 @@ function CheckIn() {
                 await checkInTicket(ticket.id);
                 successCount++;
             }
-            setDisplayMsg(`Success! Checked in ${successCount} tickets successfully.`);
+            setDisplayMsg(`Success! Checked in ${successCount} tickets successfully. Enjoy the movie!`);
             setShowTicketWindow(false);
         } catch (error) {
             setDisplayMsg("Error! Failed to check in some tickets.");
@@ -79,26 +89,38 @@ function CheckIn() {
     }
 
     const handleFindTickets = async () => {
-        if (email.length > 0) {
-            const response = await searchTicketsByEmail(email);
-            if (response.length === 0) {
-                setDisplayMsg("No tickets found for this email!");
+        try {
+            let searchResponse;
+            if (email.length > 0) {
+                searchResponse = await searchTicketsByEmail(email);
+            } else if (phone.length > 0) {
+                searchResponse = await searchTicketsByPhone(phone);
             } else {
-                setTickets(response.tickets);
-                openTicketWindow();
+                setDisplayMsg("Please enter an email or a phone number!");
+                return;
             }
-        }
-        else if (phone.length > 0) {
-            const response = await searchTicketsByPhone(phone);
-            if (response.length === 0) {
-                setDisplayMsg("No tickets found for this phone!");
-            } else {
-                setTickets(response.tickets);
-                openTicketWindow();
-            }
-        }
 
+            if (!searchResponse.found) {
+                setDisplayMsg("No tickets found for this contact info!");
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const todayTickets = searchResponse.tickets.filter(ticket => {
+                const ticketDate = ticket.showtime.split('T')[0];
+                return ticketDate === today;
+            });
+
+            if (todayTickets.length === 0) {
+                setDisplayMsg("No tickets found for TODAY!");
+            } else {
+                setTickets(todayTickets);
+                openTicketWindow();
+            }
+        } catch (error) {
+            setDisplayMsg("An error occurred while searching for tickets.");
+        }
     }
+
     return (
         <>
             <Header page="check-in" msg={displayMsg} />

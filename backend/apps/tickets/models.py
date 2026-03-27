@@ -85,6 +85,9 @@ class Ticket(models.Model):
         if self.status != self.Status.VALID:
             return False, f'Ticket is {self.status}.'
 
+        if self.reservation.showtime.start_time.date() != timezone.now().date():
+            return False, 'Ticket is not valid for today.'
+
         if self.reservation.showtime.start_time < timezone.now():
             from datetime import timedelta
             cutoff = self.reservation.showtime.start_time + timedelta(minutes=30)
