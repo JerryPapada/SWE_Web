@@ -66,6 +66,9 @@ function Login() {
         navigate('/register');
 
     }
+    const visitorLogin = async (e) => {
+        navigate('/home');
+    }
 
     return (
         <><Header page="login" msg={displayMsg} />
@@ -84,6 +87,8 @@ function Login() {
                     <Button text="Login with Google" onClick={googleLogin} disabled={false} type="submit" className="button google-button" />
                     <p id="login-or">If you don't have an Account</p>
                     <Button text="Register" onClick={userRegistration} disabled={false} type="submit" className="button" />
+                    <p id="login-or">OR</p>
+                    <Button text="Log in as a Visitor" onClick={visitorLogin} disabled={false} type="submit" className="button" />
                 </div>
             </div>
         </>
