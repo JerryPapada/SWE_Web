@@ -455,7 +455,7 @@
     margin-top: 1rem;
     padding: 0 1rem;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
 }
 
@@ -476,8 +476,8 @@
 }
 
 .email-confirmation .input {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1.2rem !important;
+    height: 1.2rem !important;
     cursor: pointer;
     accent-color: #22d3ee;
     margin: 0;

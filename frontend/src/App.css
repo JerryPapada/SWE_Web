@@ -717,7 +717,7 @@
   background-color: #7e406f;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .header-logo {
     font-size: 2rem;
     margin: 1rem 0;
@@ -753,7 +753,8 @@
 
   .input-label,
   .select-label {
-    font-size: 1.75rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
   }
 
   .button {
@@ -774,5 +775,62 @@
 
   .header-buttons {
     gap: 0.8rem;
+  }
+
+  .navbar-open {
+    width: 60%;
+  }
+
+  .nav-button-open {
+    left: 60%;
+    z-index: 100;
+  }
+
+  .nav-button-closed {
+    z-index: 100;
+  }
+
+  .navbar-open a {
+    font-size: 1.2rem;
+    padding: 0.8rem 0;
+  }
+
+  .page-content h1 {
+    font-size: 1rem;
+    padding: 0 1rem;
+    text-align: center;
+    height: 2.8rem;
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+
+  .add-button,
+  .back-button {
+    font-size: 0.9rem;
+    padding: 0 1rem;
+    height: 2.5rem;
+    top: 3.5rem;
+    right: 50%;
+    transform: translateX(50%);
+    white-space: nowrap;
+    border-radius: 0.5rem;
+  }
+
+  .page-content {
+    padding-top: 6.5rem;
+  }
+
+  .header img {
+    height: 45px;
+  }
+
+  .header-container p {
+    font-size: 0.9rem;
+  }
+
+  .header-buttons .button {
+    font-size: 0.9rem;
+    padding: 0.3rem 0.8rem;
+    height: auto;
+    width: auto;
   }
 }
