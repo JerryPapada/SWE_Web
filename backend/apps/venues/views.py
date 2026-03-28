@@ -1,4 +1,5 @@
 import logging
+from drf_spectacular.utils import extend_schema, OpenApiTypes
 from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
