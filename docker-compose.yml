@@ -20,6 +20,7 @@ services:
       - EMAIL_HOST_PASSWORD=esikvhqlieilosrs 
       - EMAIL_USE_TLS=true
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      - FRONTEND_URL=https://localhost
     depends_on:
       db:
         condition: service_healthy
@@ -71,4 +72,3 @@ volumes:
   cinema_postgres_data:
   caddy_data:
   caddy_config:
-

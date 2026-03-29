@@ -1,4 +1,4 @@
-Initial implementation notes
+Prompts
 
 1. Set up a Django backend skeleton for cinema reservations.
 2. Add QR generation/validation for ticket entry.

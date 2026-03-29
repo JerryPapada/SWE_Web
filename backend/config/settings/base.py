@@ -168,8 +168,8 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-# Frontend URL
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+# Frontend URL (used in email templates)
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'https://localhost')
 
 # Google OAuth2
 SOCIALACCOUNT_PROVIDERS = {
