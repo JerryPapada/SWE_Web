@@ -10,7 +10,6 @@ from drf_spectacular.types import OpenApiTypes
 from django.contrib.auth import get_user_model
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 
 from .serializers import (
@@ -57,15 +56,6 @@ class ChangePasswordView(APIView):
 
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
-    client_class = OAuth2Client
-
-    @property
-    def callback_url(self):
-        from django.conf import settings
-        return os.environ.get(
-            'GOOGLE_CALLBACK_URL',
-            getattr(settings, 'FRONTEND_URL', 'http://localhost:4200') + '/auth/google/callback'
-        )
 
 
 class AdminUserManagementViewSet(ModelViewSet):

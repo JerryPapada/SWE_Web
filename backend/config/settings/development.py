@@ -23,6 +23,9 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'we
 
 # Additional CORS origins for development
 CORS_ALLOWED_ORIGINS = [
+    'https://localhost',
+    'https://127.0.0.1',
+    'https://192.168.1.69',
     'http://localhost:4200',
     'http://127.0.0.1:4200',
     'http://localhost:3000',

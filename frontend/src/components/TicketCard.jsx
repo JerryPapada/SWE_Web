@@ -10,7 +10,7 @@ function TicketCard({ ticket }) {
     // Ensure the QR code has a proper base URL (adjust if needed depending on environment)
     const qrCodeUrl = ticket.qr_code?.startsWith('http') 
         ? ticket.qr_code 
-        : `http://localhost:8000${ticket.qr_code}`;
+        : ticket.qr_code;
 
     return (
         <article className="ticket-card">

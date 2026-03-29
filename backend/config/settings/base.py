@@ -130,7 +130,6 @@ SITE_ID = 1
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -209,10 +208,21 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:8000')
+BACKEND_URL = os.environ.get('BACKEND_URL', 'https://localhost')
+
+# HTTPS Proxy (Caddy)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_TRUSTED_ORIGINS = [
+    'https://localhost',
+    'https://127.0.0.1',
+    'https://192.168.1.69',
+]
 
 # CORS
 CORS_ALLOWED_ORIGINS = [
+    'https://localhost',
+    'https://127.0.0.1',
+    'https://192.168.1.69',
     'http://localhost:4200',
     'http://127.0.0.1:4200',
     'http://localhost:5173',
