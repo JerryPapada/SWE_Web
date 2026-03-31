@@ -198,10 +198,11 @@
   box-sizing: border-box;
 }
 
-.select-label {
+.label-select-new,
+.select.label {
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgb(141, 52, 52);
+  color: white !important;
 }
 
 
@@ -304,7 +305,8 @@
   display: block;
   width: 100%;
   font-size: 1.3rem;
-  color: rgb(141, 52, 52);
+  color: white;
+  margin-bottom: 0.5rem;
 
   padding: 0.5rem 0;
   text-align: center;

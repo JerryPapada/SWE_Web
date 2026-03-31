@@ -2,7 +2,7 @@
 function Select({ label, onChange, options, value, error }) {
     return (
         <div className="selects">
-            <label className="select-label">{label}</label>
+            <label className="label-select-new">{label}</label>
             <select
                 className={error ? "select-error" : "select"}
                 onChange={onChange}
