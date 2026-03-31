@@ -1,5 +1,7 @@
 Prompts
+Gemini-3-Flash
 
 1. Set up a Django backend skeleton for cinema reservations.
 2. Add QR generation/validation for ticket entry.
 3. Add email notifications when a venue/showtime change affects reservations with gmail
+4. Fix the error so that images can be displayed in a staging server 
