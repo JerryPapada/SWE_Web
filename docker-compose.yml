@@ -4,7 +4,7 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
-    command: bash -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py migrate --noinput && python manage.py seed_initial_data --if-empty && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
     expose:
@@ -21,6 +21,8 @@ services:
       - EMAIL_USE_TLS=true
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
       - FRONTEND_URL=https://localhost
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
     depends_on:
       db:
         condition: service_healthy
