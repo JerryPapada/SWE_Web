@@ -43,7 +43,7 @@ function CinemaCard({ cinema, onRefresh, onSetMsg }) {
     return (
         <div className="card">
             <div className="card-image">
-                <img src={cinema.photo || '/logo.svg'} alt={cinema.name} />
+                <img src={cinema.photo || '/logo.png'} alt={cinema.name} />
                 {!cinema.is_active && <span className="inactive-badge">Inactive</span>}
             </div>
             <div className="card-info">

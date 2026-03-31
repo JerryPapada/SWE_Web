@@ -6,7 +6,7 @@ function MovieCarousel({ moviesList, selectMovie, selectedMovie }) {
                 <div key={movie.id} className="carousel-item" onClick={() => selectMovie(movie)}>
                     <div className={`home-card ${selectedMovie?.id === movie.id ? 'selected-card' : ''}`}>
                         <div className="home-card-image">
-                            <img src={movie.poster || '/logo.svg'} alt={movie.title} />
+                            <img src={movie.poster || '/logo.png'} alt={movie.title} />
                         </div>
                         <div className="home-card-info">
                             <h2 style={{ fontSize: '1.2rem' }}>{movie.title}</h2>

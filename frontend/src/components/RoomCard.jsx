@@ -57,7 +57,7 @@ function RoomCard({ room, onRefresh, onSetMsg, roomTypesList }) {
     return (
         <div className="card">
             <div className="card-image">
-                <img src={room.photo || '/logo.svg'} alt={room.name} />
+                <img src={room.photo || '/logo.png'} alt={room.name} />
                 {isAdmin && !room.is_active && <span className="inactive-badge">Inactive</span>}
             </div>
             <div className="card-info">

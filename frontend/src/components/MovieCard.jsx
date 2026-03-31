@@ -65,7 +65,7 @@ function MovieCard({ movie, onRefresh, onSetMsg, ratingOptions }) {
     return (
         <div className="card">
             <div className="card-image">
-                <img src={movie.poster || '/logo.svg'} alt={movie.title} />
+                <img src={movie.poster || '/logo.png'} alt={movie.title} />
                 {!movie.is_active && <span className="inactive-badge">Inactive</span>}
             </div>
             <div className="card-info">

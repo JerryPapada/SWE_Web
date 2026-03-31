@@ -66,7 +66,7 @@ function MovieInfo() {
                     <Button text="Back" onClick={handleBackToHome} type="button" className="back-button" />
                     {movie ? (
                         <div className="movie-details">
-                            <img src={movie.poster || '/logo.svg'} alt={movie.title} className="movie-poster" />
+                            <img src={movie.poster || '/logo.png'} alt={movie.title} className="movie-poster" />
                             <div className="movie-info">
                                 <h2>{movie.title}</h2>
                                 {movie.original_title && <h3>{movie.original_title}</h3>}

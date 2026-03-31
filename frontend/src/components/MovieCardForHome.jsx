@@ -12,7 +12,7 @@ function MovieCardForHome({ movie, onRefresh, onSetMsg, ratingOptions }) {
 
         <div className="home-card" onClick={() => openMovieInfo(movie.id)}>
             <div className="home-card-image">
-                <img src={movie.poster || '/logo.svg'} alt={movie.title} />
+                <img src={movie.poster || '/logo.png'} alt={movie.title} />
             </div>
             <div className="home-card-info">
                 <h2>{movie.title}</h2>
