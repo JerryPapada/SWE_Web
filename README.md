@@ -1,16 +1,16 @@
 # Cinema Reservation Web Application
 
-Full-stack cinema and ticketing coursework application with a Django REST backend, React frontend, PostgreSQL, and Docker Compose.
+Full-stack cinema and ticketing coursework project with a Django REST backend, React frontend, PostgreSQL database, and Docker Compose/Caddy deployment configuration.
 
-## Features
+## Main workflows
 
-- Browse cinemas, rooms, movies, and showtimes.
-- Register/authenticate users and manage reservations.
-- Select seats and create reservation records.
+- Browse cinemas, rooms, films, and showtimes.
+- Register and authenticate users.
+- Select seats and create reservations.
 - Generate tickets and view reservation history.
-- Staff workflows for schedules, venues, and ticket validation.
+- Support staff workflows for schedules, venues, and ticket validation.
 
-The backend is organized into domain apps for users, reservations, tickets, notifications, and visitor records. The README describes transactional reservation creation and row locking for seat conflicts.
+The backend separates users, reservations, tickets, notifications, and visitor records into domain apps. The project documentation describes transactional reservation creation and row locking for seat conflicts. The frontend consumes the API and the Compose stack includes the database and reverse proxy.
 
 ## Run locally
 
@@ -20,8 +20,14 @@ Requirements: Docker Engine and Docker Compose.
 docker compose up --build
 ```
 
-The Compose stack starts the backend, frontend, database, and Caddy reverse proxy. Review `Caddyfile`, backend settings, and `backend/.env.example` for local endpoint and OAuth/email configuration.
+The Compose file starts the backend, frontend, database, and Caddy. Review Caddyfile, Django settings, and backend/.env.example for local endpoint, OAuth, and email configuration. Use the repository's current Compose port mappings when opening the frontend/API; those mappings can differ from a production deployment.
 
-## Security
+Stop the local stack with:
 
-This repository is public, and the current Compose configuration contains static mail/database credential values. Treat those as exposed: rotate any real or reused credential and move secrets into an appropriate private runtime configuration. The checked-in example configuration also contains defaults and must not be treated as production-ready.
+```bash
+docker compose down
+```
+
+## Security and deployment
+
+This public repository contains static mail/database credential values in Compose, and the example environment file has defaults. Treat any real/reused values as exposed and rotate them. Replace defaults through private runtime configuration before deployment. Review OAuth callback URLs, email settings, and Caddy routing separately for each environment; local Compose settings are not production-ready.
