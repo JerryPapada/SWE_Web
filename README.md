@@ -12,6 +12,12 @@ Full-stack cinema and ticketing coursework project with a Django REST backend, R
 
 The backend separates users, reservations, tickets, notifications, and visitor records into domain apps. The project documentation describes transactional reservation creation and row locking for seat conflicts. The frontend consumes the API and the Compose stack includes the database and reverse proxy.
 
+## Local environment configuration
+
+## Local environment configuration
+
+Before running the Compose stack, copy `.env.example` to `.env`. Set `DATABASE_URL`, `SECRET_KEY`, `POSTGRES_USER`, and `POSTGRES_PASSWORD`; use matching database values in the URL and PostgreSQL service. Email and Google sign-in credentials are optional for startup, but the corresponding features need valid provider configuration. The backend template at `backend/.env.example` is for configuring the backend outside Compose; copy it to `backend/.env` and fill the same application settings when using that workflow. Both local environment files are ignored by Git.
+
 ## Run locally
 
 Requirements: Docker Engine and Docker Compose.
