@@ -1,37 +1,27 @@
-# Web Software Engineering
+# Cinema Reservation Web Application
 
-Full-stack cinema reservation system developed for postgraduate Web Software Engineering coursework.
+Full-stack cinema and ticketing coursework application with a Django REST backend, React frontend, PostgreSQL, and Docker Compose.
 
-## Overview
+## Features
 
-The application provides cinema, room, movie, showtime, seat, reservation, ticket, and visitor-management workflows. It includes a Django REST backend and a frontend application, with authentication, role-based authorization, and transactional seat reservation.
+- Browse cinemas, rooms, movies, and showtimes.
+- Register/authenticate users and manage reservations.
+- Select seats and create reservation records.
+- Generate tickets and view reservation history.
+- Staff workflows for schedules, venues, and ticket validation.
 
-## Technology
-
-- Django 4.2 and Django REST Framework
-- PostgreSQL
-- JWT authentication
-- Google OAuth
-- React frontend
-- Docker Compose
-
-## Main workflows
-
-- Browse cinemas, movies, rooms, and showtimes
-- Register and authenticate users
-- Select seats and create reservations safely
-- Generate tickets and reservation history
-- Validate tickets and record cinema visits
-- Manage venues and schedules as staff
+The backend is organized into domain apps for users, reservations, tickets, notifications, and visitor records. The README describes transactional reservation creation and row locking for seat conflicts.
 
 ## Run locally
+
+Requirements: Docker Engine and Docker Compose.
 
 ```bash
 docker compose up --build
 ```
 
-See the backend and frontend directories for service-specific setup instructions. `Caddyfile` contains the local reverse-proxy configuration.
+The Compose stack starts the backend, frontend, database, and Caddy reverse proxy. Review `Caddyfile`, backend settings, and `backend/.env.example` for local endpoint and OAuth/email configuration.
 
-## Architecture
+## Security
 
-The backend is organized around users, venues, reservations, tickets, notifications, and visitor logs. Reservation creation uses database transactions and row locking to prevent conflicting seat assignments.
+This repository is public, and the current Compose configuration contains static mail/database credential values. Treat those as exposed: rotate any real or reused credential and move secrets into an appropriate private runtime configuration. The checked-in example configuration also contains defaults and must not be treated as production-ready.
